@@ -25,6 +25,7 @@ const CoinGeckoLensPrice = (symbol: ExchangeSymbol) => lensPath([symbol.id, "usd
  * 
  * @param symbol The symbol to fetch the price for.
  * @returns The current price for the specified symbol.
+ * @requires COINGECKO_API_KEY environment variable to be set.
  */
 export async function fetchSpotCoingecko(symbol: ExchangeSymbol): Promise<fetchSpotCoingeckoResponse> {
     const response = await axios.get(COINGECKO_API, {

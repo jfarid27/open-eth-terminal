@@ -4,9 +4,10 @@ import { spotTerminal } from "./spot/index.ts";
 
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
+import figlet from "figlet";
 
 export async function terminalMain() {
-  console.log(chalk.green("Welcome to Open Eth Terminal"));
+  console.log(chalk.green(figlet.textSync("Open Eth Terminal", { horizontalLayout: 'full' })));
 
   while (true) {
     terminal.table([
