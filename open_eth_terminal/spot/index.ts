@@ -1,0 +1,106 @@
+import inquirer from "inquirer";
+import { Command } from "commander";
+import chalk from "chalk";
+import { spot } from "../../open_eth/spot/index.ts";
+import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
+import { ENVIRONMENT, DEBUG, EnvironmentType } from "./config.ts";
+
+import terminalKit from "terminal-kit";
+const { terminal } = terminalKit;
+
+export async function spotTerminal() {
+  console.log(chalk.blue("Entered Spot Market Application"));
+  
+  while (true) {
+    terminal.table([
+        ['Command', 'Description'],
+        ['price <SYMBOL>', 'Fetch current price for the given symbol'],
+        ['back', 'Go back to the main menu'],
+        ['exit', 'Exit the application']
+    ], {
+        hasBorder: true,
+        contentHasMarkup: true,
+        borderChars: 'lightRounded',
+        borderAttr: { color: 'cyan' },
+        textAttr: { bgColor: 'default' },
+        firstRowTextAttr: { bgColor: 'cyan' },
+        width: 60,
+        fit: true
+    });
+    const { command } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "command",
+        message: "Spot >",
+      },
+    ]);
+
+    const input = command.trim();
+    if (!input) continue;
+
+    let shouldReturn = false;
+
+    const program = new Command();
+    program.exitOverride();
+    program.configureOutput({
+      writeErr: (str) => process.stdout.write(chalk.red(str)),
+    });
+
+    program
+      .command("back")
+      .description("Go back to the main menu")
+      .action(() => {
+        shouldReturn = true;
+      });
+
+    program
+      .command("exit")
+      .description("Exit the application")
+      .action(() => {
+        process.exit(0);
+      });
+
+    program
+      .command("price <symbol>")
+      .description("Get current price of a symbol")
+      .action(async (symbolStr) => {
+        try {
+          const symbolObj = {
+            name: symbolStr,
+            id: symbolStr.toLowerCase(),
+            _type: ExchangeSymbolType.CoinGecko,
+          };
+          
+          const result = await spot(symbolObj);
+          
+          if (DEBUG) {
+            console.log(result);
+          }
+          
+          console.log(chalk.yellow(`Symbol: ${result.symbol.name}`));
+          console.log(chalk.green(`Price: $${result.price}`));
+        } catch (error) {
+            console.log(ENVIRONMENT === EnvironmentType.Development)
+            if (ENVIRONMENT === EnvironmentType.Development) {
+                console.log(error);
+            }
+            console.log(chalk.red("Network Error"));
+        }
+      });
+
+    try {
+      // Split by whitespace to simulate argv
+      const args = input.split(/\s+/);
+      await program.parseAsync(args, { from: "user" });
+    } catch (err: any) {
+        // Command execution failed or help was displayed
+        if (err.code === 'commander.unknownCommand') {
+             // Default commander error message is usually sufficient (printed via writeErr above)
+        }
+    }
+    
+    if (shouldReturn) {
+        return;
+    }
+  }
+}
