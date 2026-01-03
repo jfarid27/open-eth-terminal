@@ -29,20 +29,7 @@ const mainMenu: Menu = {
     options: menuOptions,
 }
 
-export async function terminalMain(st: TerminalUserStateConfig | undefined) {
-  // Only show banner on initial load
-  if (!st) {
-      console.log(chalk.green(figlet.textSync("Open Eth Terminal", { horizontalLayout: 'full' })));
-  }
-  
-  const state: TerminalUserStateConfig = st || {
-    environment: ENVIRONMENT,
-    debugMode: DEBUG,
-    apiKeys: {
-        coingecko: COINGECKO_API_KEY,
-    },
-    loadedContext: {},
-  };
+export async function terminalMain(state: TerminalUserStateConfig) {
 
   const tableDescriptions = mainMenu.options.map((option) => [option.name, option.description]);
   terminal.table([
@@ -82,4 +69,20 @@ export async function terminalMain(st: TerminalUserStateConfig | undefined) {
   // Note: spotTerminal is now responsible for its own loop or recursion, 
   // but if it returns here, we are back at main menu.
   return terminalMain(newState || state);
+}
+
+export async function startMain() {
+  // Only show banner on initial load
+  console.log(chalk.green(figlet.textSync("Open Eth Terminal", { horizontalLayout: 'full' })));
+  
+  const state: TerminalUserStateConfig = {
+    environment: ENVIRONMENT,
+    debugMode: DEBUG,
+    apiKeys: {
+        coingecko: COINGECKO_API_KEY,
+    },
+    loadedContext: {},
+  };
+  
+  return terminalMain(state); 
 }
