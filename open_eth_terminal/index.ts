@@ -12,11 +12,13 @@ import { Menu, MenuOption, TerminalUserStateConfig } from "./types.ts";
 const menuOptions: MenuOption[] = [
     {
         name: "spot",
+        command: "spot",
         description: "Fetch spot prices from various sources",
         action: (st: TerminalUserStateConfig) => spotTerminal(st),
     },
     {
         name: "exit",
+        command: "exit",
         description: "Exit the application",
         action: (st: TerminalUserStateConfig) => process.exit(0),
     },

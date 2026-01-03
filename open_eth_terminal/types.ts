@@ -33,13 +33,16 @@ export interface TerminalUserStateConfig {
     loadedContext: LoadedContext;
 }
 
+export type ActionOptions = any;
+
 /**
  * Abstract menu option for terminal state.
  */
 export interface MenuOption {
     name: string;
+    command: string;
     description: string;
-    action: (st: TerminalUserStateConfig) => Promise<TerminalUserStateConfig | void>;
+    action: (st: TerminalUserStateConfig, ops?: ActionOptions) => Promise<TerminalUserStateConfig | void>;
 }
 
 /**
