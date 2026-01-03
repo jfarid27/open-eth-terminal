@@ -3,12 +3,12 @@ import { Command } from "commander";
 import chalk from "chalk";
 import { spot } from "../../open_eth/spot/index.ts";
 import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
-import { ENVIRONMENT, DEBUG, EnvironmentType } from "./config.ts";
+import { TerminalUserStateConfig, EnvironmentType } from "../types.ts";
 
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 
-export async function spotTerminal() {
+export async function spotTerminal(st: TerminalUserStateConfig) {
   console.log(chalk.blue("Entered Spot Market Application"));
   
   while (true) {
@@ -64,6 +64,11 @@ export async function spotTerminal() {
       .command("price <symbol>")
       .description("Get current price of a symbol")
       .action(async (symbolStr) => {
+        const COINGECKO_API_KEY = st.apiKeys.coingecko;
+        if (!COINGECKO_API_KEY) {
+            console.log(chalk.red("No CoinGecko API key found"));
+            return;
+        }
         try {
           const symbolObj = {
             name: symbolStr,
@@ -71,17 +76,17 @@ export async function spotTerminal() {
             _type: ExchangeSymbolType.CoinGecko,
           };
           
-          const result = await spot(symbolObj);
+          const result = await spot(symbolObj, COINGECKO_API_KEY);
           
-          if (DEBUG) {
+          if (st.debugMode) {
             console.log(result);
           }
           
           console.log(chalk.yellow(`Symbol: ${result.symbol.name}`));
           console.log(chalk.green(`Price: $${result.price}`));
         } catch (error) {
-            console.log(ENVIRONMENT === EnvironmentType.Development)
-            if (ENVIRONMENT === EnvironmentType.Development) {
+            console.log(st.environment === EnvironmentType.Development)
+            if (st.environment === EnvironmentType.Development) {
                 console.log(error);
             }
             console.log(chalk.red("Network Error"));
