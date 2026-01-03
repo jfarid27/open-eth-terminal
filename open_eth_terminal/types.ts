@@ -39,7 +39,7 @@ export interface TerminalUserStateConfig {
 export interface MenuOption {
     name: string;
     description: string;
-    action: (st: TerminalUserStateConfig) => void;
+    action: (st: TerminalUserStateConfig) => Promise<TerminalUserStateConfig | void>;
 }
 
 /**

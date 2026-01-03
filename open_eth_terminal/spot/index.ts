@@ -14,10 +14,9 @@ const tokenLens = lensPath(["loadedContext", "token", "symbol"]);
 // View the loaded token on the user state config.
 const getLoadedToken = view(tokenLens);
 
-export async function spotTerminal(st: TerminalUserStateConfig) {
+export async function spotTerminal(st: TerminalUserStateConfig): Promise<TerminalUserStateConfig> {
   console.log(chalk.blue("Entered Spot Market Application"));
   
-  while (true) {
     terminal.table([
         ['Command', 'Description'],
         ['price [SYMBOL]', 'Fetch current price for the given symbol (default: ethereum)'],
@@ -33,6 +32,7 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
         width: 60,
         fit: true
     });
+    
     const { command } = await inquirer.prompt([
       {
         type: "input",
@@ -42,9 +42,10 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
     ]);
 
     const input = command.trim();
-    if (!input) continue;
+    if (!input) return spotTerminal(st);
 
     let shouldReturn = false;
+    let nextState = st;
 
     const program = new Command();
     program.exitOverride();
@@ -76,11 +77,13 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
             return;
         }
         
-        let loadedTokenSymbol = getLoadedToken(st) || symbolStr;
+        let loadedTokenSymbol: string | undefined = symbolStr || getLoadedToken(st); 
+        
         if (!loadedTokenSymbol) {
-            console.log(chalk.red("No symbol provided"));
-            return;
+          console.log("No symbol provided");
+          return;
         }
+        
         try {
           const symbolObj = {
             name: loadedTokenSymbol,
@@ -97,7 +100,6 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
           console.log(chalk.yellow(`Symbol: ${result.symbol.name}`));
           console.log(chalk.green(`Price: $${result.price}`));
         } catch (error) {
-            console.log(st.environment === EnvironmentType.Development)
             if (st.environment === EnvironmentType.Development) {
                 console.log(error);
             }
@@ -110,14 +112,14 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
       const args = input.split(/\s+/);
       await program.parseAsync(args, { from: "user" });
     } catch (err: any) {
-        // Command execution failed or help was displayed
         if (err.code === 'commander.unknownCommand') {
-             // Default commander error message is usually sufficient (printed via writeErr above)
+             // Handled by commander
         }
     }
     
     if (shouldReturn) {
-        return;
+        return nextState;
     }
-  }
+    
+    return spotTerminal(nextState);
 }
