@@ -7,20 +7,29 @@ const { terminal } = terminalKit;
 import figlet from "figlet";
 
 import { ENVIRONMENT, DEBUG, COINGECKO_API_KEY } from "./config.ts";
-import { Menu, MenuOption, TerminalUserStateConfig } from "./types.ts";
+import { Menu, MenuOption, TerminalUserStateConfig, CommandResult } from "./types.ts";
 
 const menuOptions: MenuOption[] = [
     {
         name: "spot",
         command: "spot",
         description: "Fetch spot prices from various sources",
-        action: (st: TerminalUserStateConfig) => spotTerminal(st),
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await spotTerminal(st);
+            return {
+                result: CommandResult.Success, // Assuming success if it returns
+                state: newState,
+            };
+        },
     },
     {
         name: "exit",
         command: "exit",
         description: "Exit the application",
-        action: (st: TerminalUserStateConfig) => process.exit(0),
+        action: (st: TerminalUserStateConfig) => async () => {
+             process.exit(0);
+             return { result: CommandResult.Exit, state: st };
+        },
     },
 ];
 
@@ -65,7 +74,15 @@ export async function terminalMain(state: TerminalUserStateConfig) {
   
   // Execute action. If it returns a state, use it. Otherwise keep current state.
   // We expect sub-menus to potentially return modified state.
-  const newState = await option.action(state);
+  const actionFn = option.action(state);
+  // The main menu actions (spot, exit) don't take arguments currently.
+  const result = await actionFn();
+  
+  // result is CommandState (or should be). 
+  // If spotTerminal returns TerminalUserStateConfig, we need to handle that mismatch, 
+  // but for now assuming we interpret result.state if it exists, or result itself as state if mismatched logic persists.
+  // Given current types, result is CommandState.
+  const newState = result?.state;
   
   // Recursive step: call main with new or existing state
   // Note: spotTerminal is now responsible for its own loop or recursion, 
@@ -84,6 +101,7 @@ export async function startMain() {
         coingecko: COINGECKO_API_KEY,
     },
     loadedContext: {},
+    actionTimeout: 5000,
   };
   
   return terminalMain(state); 

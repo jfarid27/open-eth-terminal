@@ -31,6 +31,7 @@ export interface TerminalUserStateConfig {
     debugMode: boolean;
     apiKeys: APIKeyConfig;
     loadedContext: LoadedContext;
+    actionTimeout?: number;
 }
 
 export type ActionOptions = any;
@@ -42,7 +43,7 @@ export interface MenuOption {
     name: string;
     command: string;
     description: string;
-    action: (st: TerminalUserStateConfig, ops?: ActionOptions) => Promise<TerminalUserStateConfig | void>;
+    action: (st: TerminalUserStateConfig) => (...args: any[]) => Promise<CommandState>;
 }
 
 /**
@@ -53,4 +54,17 @@ export interface Menu {
     description: string;
     messagePrompt: string;
     options: MenuOption[];
+}
+
+export enum CommandResult {
+    Success = "success",
+    Error = "error",
+    Back = "back",
+    Exit = "exit",
+    Timeout = "timeout",
+}
+    
+export interface CommandState {
+    result: CommandResult;
+    state: TerminalUserStateConfig;
 }

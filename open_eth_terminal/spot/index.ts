@@ -4,7 +4,8 @@ import chalk from "chalk";
 import { spot } from "../../open_eth/spot/index.ts";
 import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
 import type { ActionOptions } from "../types.ts";
-import { TerminalUserStateConfig, EnvironmentType, Menu, MenuOption } from "../types.ts";
+import { loadProgram } from "../utils/program_loader.ts";
+import { TerminalUserStateConfig, EnvironmentType, Menu, MenuOption, CommandState, CommandResult } from "../types.ts";
 import { lensPath, view, pipe } from "ramda";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
@@ -15,46 +16,24 @@ const tokenLens = lensPath(["loadedContext", "token", "symbol"]);
 // View the loaded token on the user state config.
 const getLoadedToken = view(tokenLens);
 
-const spotMenuOptions: MenuOption[] = [
-    {
-        name: "price",
-        command: "price [symbol]",
-        description: "Fetch current price for the given symbol (default: ethereum)",
-        action: spotPriceHandler,
-    },
-    {
-        name: "back",
-        command: "back",
-        description: "Go back to the main menu",
-        action: async (st: TerminalUserStateConfig, ops?: ActionOptions) => { ops.cb(); },
-    },
-    {
-        name: "exit",
-        command: "exit",
-        description: "Exit the application",
-        action: async (st: TerminalUserStateConfig, ops?: ActionOptions) => { ops.cb(); },
-    },
-]
-
-const spotMenu: Menu = {
-    name: "Spot Menu",
-    description: "Spot Menu",
-    messagePrompt: "Select an option:",
-    options: spotMenuOptions,
-}
-
-export async function spotPriceHandler(st: TerminalUserStateConfig, symbolStr: string) {
+const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
     const COINGECKO_API_KEY = st.apiKeys.coingecko;
     if (!COINGECKO_API_KEY) {
         console.log(chalk.red("No CoinGecko API key found"));
-        return;
+        return {
+            result: CommandResult.Error,
+            state: st,
+        };
     }
 
     let loadedTokenSymbol: string | undefined = symbolStr || getLoadedToken(st); 
 
     if (!loadedTokenSymbol) {
         console.log("No symbol provided");
-        return;
+        return {
+            result: CommandResult.Error,
+            state: st,
+        };
     }
 
     try {
@@ -77,7 +56,54 @@ export async function spotPriceHandler(st: TerminalUserStateConfig, symbolStr: s
             console.log(error);
         }
         console.log(chalk.red("Network Error"));
+        return {
+            result: CommandResult.Error,
+            state: st,
+        };
     }
+    
+    return {
+        result: CommandResult.Success,
+        state: st,
+    };
+}
+
+const spotMenuOptions: MenuOption[] = [
+    {
+        name: "price",
+        command: "price [symbol]",
+        description: "Fetch current price for the given symbol (default: ethereum)",
+        action: spotPriceHandler,
+    },
+    {
+        name: "back",
+        command: "back",
+        description: "Go back to the main menu",
+        action: (st: TerminalUserStateConfig) => async (ops?: ActionOptions) => {
+            return {
+                result: CommandResult.Back,
+                state: st,
+            };
+        },
+    },
+    {
+        name: "exit",
+        command: "exit",
+        description: "Exit the application",
+        action: (st: TerminalUserStateConfig) => async (ops?: ActionOptions) => { 
+            return {
+                result: CommandResult.Exit,
+                state: st,
+            };
+        },
+    },
+]
+
+const spotMenu: Menu = {
+    name: "Spot Menu",
+    description: "Spot Menu",
+    messagePrompt: "Select an option:",
+    options: spotMenuOptions,
 }
 
 export async function spotTerminal(st: TerminalUserStateConfig): Promise<TerminalUserStateConfig> {
@@ -118,49 +144,41 @@ export async function spotTerminal(st: TerminalUserStateConfig): Promise<Termina
     program.configureOutput({
       writeErr: (str) => process.stdout.write(chalk.red(str)),
     });
+      
 
-    const priceMenuOption = spotMenu.options.find((option) => option.name === "price");
-    const backMenuOption = spotMenu.options.find((option) => option.name === "back");
-    const exitMenuOption = spotMenu.options.find((option) => option.name === "exit");
+    const resultPs = spotMenu.options.map((option) => {
+        return loadProgram(program, option, st);
+    });
     
-    if (backMenuOption) {
-        program
-            .command(backMenuOption.command)
-            .description(backMenuOption.description)
-            .action(() => {
-                backMenuOption.action(st, { cb: () => shouldReturn = true });
-            });
-    }
-    
-    if (exitMenuOption) {
-        program
-            .command(exitMenuOption.command)
-            .description(exitMenuOption.description)
-            .action(() => {
-                exitMenuOption.action(st, { cb: () => process.exit(0)});
-            });
-    }
-    
-    if (priceMenuOption) {
-        program
-            .command(priceMenuOption.command)
-            .description(priceMenuOption.description)
-            .action((symbolStr: string) => spotPriceHandler(st, symbolStr));
-    }
     
     try {
-      // Split by whitespace to simulate argv
-      const args = input.split(/\s+/);
-      await program.parseAsync(args, { from: "user" });
-    } catch (err: any) {
-        if (err.code === 'commander.unknownCommand') {
-             // Handled by commander
+        const args = input.split(/\s+/);
+        await program.parseAsync(args, { from: "user" });
+        const result = await Promise.race(resultPs);
+        if (result && result.result === CommandResult.Back) {
+            return result.state;
         }
+        
+        if (result && result.result === CommandResult.Exit) {
+            process.exit(0);
+        }
+      
+    } catch (err: any) {
+        
+        if (err.result === CommandResult.Timeout) {
+            console.log(chalk.red("Command timed out"));
+        }
+        
+        if (err.result === CommandResult.Error) {
+            console.log(chalk.red("Command failed"));
+        }
+        
+        if (st.debugMode) {
+            console.log(err);
+        }
+
     }
     
-    if (shouldReturn) {
-        return nextState;
-    }
     
     return spotTerminal(nextState);
 }
