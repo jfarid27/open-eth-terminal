@@ -15,6 +15,14 @@ export interface APIKeyConfig {
     coingecko?: string;
 }
 
+export interface TokenContext {
+    symbol: string;
+}
+
+export interface LoadedContext {
+    token?: TokenContext;
+}
+
 /**
  * Configuration for the terminal user state.
  */
@@ -22,6 +30,7 @@ export interface TerminalUserStateConfig {
     environment: EnvironmentType;
     debugMode: boolean;
     apiKeys: APIKeyConfig;
+    loadedContext: LoadedContext;
 }
 
 /**

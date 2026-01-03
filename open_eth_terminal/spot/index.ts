@@ -4,9 +4,15 @@ import chalk from "chalk";
 import { spot } from "../../open_eth/spot/index.ts";
 import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
 import { TerminalUserStateConfig, EnvironmentType } from "../types.ts";
-
+import { lensPath, view, pipe } from "ramda";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
+
+// Lens for the loaded token on the user state config.
+const tokenLens = lensPath(["loadedContext", "token", "symbol"]);
+
+// View the loaded token on the user state config.
+const getLoadedToken = view(tokenLens);
 
 export async function spotTerminal(st: TerminalUserStateConfig) {
   console.log(chalk.blue("Entered Spot Market Application"));
@@ -14,7 +20,7 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
   while (true) {
     terminal.table([
         ['Command', 'Description'],
-        ['price <SYMBOL>', 'Fetch current price for the given symbol'],
+        ['price [SYMBOL]', 'Fetch current price for the given symbol (default: ethereum)'],
         ['back', 'Go back to the main menu'],
         ['exit', 'Exit the application']
     ], {
@@ -59,20 +65,26 @@ export async function spotTerminal(st: TerminalUserStateConfig) {
       .action(() => {
         process.exit(0);
       });
-
+      
     program
-      .command("price <symbol>")
+      .command("price [symbol]")
       .description("Get current price of a symbol")
-      .action(async (symbolStr) => {
+      .action(async (symbolStr: string) => {
         const COINGECKO_API_KEY = st.apiKeys.coingecko;
         if (!COINGECKO_API_KEY) {
             console.log(chalk.red("No CoinGecko API key found"));
             return;
         }
+        
+        let loadedTokenSymbol = getLoadedToken(st) || symbolStr;
+        if (!loadedTokenSymbol) {
+            console.log(chalk.red("No symbol provided"));
+            return;
+        }
         try {
           const symbolObj = {
-            name: symbolStr,
-            id: symbolStr.toLowerCase(),
+            name: loadedTokenSymbol,
+            id: loadedTokenSymbol.toLowerCase(),
             _type: ExchangeSymbolType.CoinGecko,
           };
           
