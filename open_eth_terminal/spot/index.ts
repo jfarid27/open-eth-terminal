@@ -4,7 +4,7 @@ import chalk from "chalk";
 import { spot } from "../../open_eth/spot/index.ts";
 import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
 import type { ActionOptions } from "../types.ts";
-import { loadProgram } from "../utils/program_loader.ts";
+import { loadProgram, registerTerminalApplication } from "../utils/program_loader.ts";
 import { TerminalUserStateConfig, EnvironmentType, Menu, MenuOption, CommandState, CommandResult } from "../types.ts";
 import { lensPath, view, pipe } from "ramda";
 import terminalKit from "terminal-kit";
@@ -106,79 +106,4 @@ const spotMenu: Menu = {
     options: spotMenuOptions,
 }
 
-export async function spotTerminal(st: TerminalUserStateConfig): Promise<TerminalUserStateConfig> {
-  console.log(chalk.blue("Entered Spot Market Application"));
-  
-  const tableDescriptions = spotMenu.options.map((option) => [option.name, option.description]);
-  
-    terminal.table([
-        ['Command', 'Description'],
-        ...tableDescriptions,
-    ], {
-        hasBorder: true,
-        contentHasMarkup: true,
-        borderChars: 'lightRounded',
-        borderAttr: { color: 'cyan' },
-        textAttr: { bgColor: 'default' },
-        firstRowTextAttr: { bgColor: 'cyan' },
-        width: 60,
-        fit: true
-    });
-    
-    const { command } = await inquirer.prompt([
-      {
-        type: "input",
-        name: "command",
-        message: "Spot >",
-      },
-    ]);
-
-    const input = command.trim();
-    if (!input) return spotTerminal(st);
-
-    let shouldReturn = false;
-    let nextState = st;
-
-    const program = new Command();
-    program.exitOverride();
-    program.configureOutput({
-      writeErr: (str) => process.stdout.write(chalk.red(str)),
-    });
-      
-
-    const resultPs = spotMenu.options.map((option) => {
-        return loadProgram(program, option, st);
-    });
-    
-    
-    try {
-        const args = input.split(/\s+/);
-        await program.parseAsync(args, { from: "user" });
-        const result = await Promise.race(resultPs);
-        if (result && result.result === CommandResult.Back) {
-            return result.state;
-        }
-        
-        if (result && result.result === CommandResult.Exit) {
-            process.exit(0);
-        }
-      
-    } catch (err: any) {
-        
-        if (err.result === CommandResult.Timeout) {
-            console.log(chalk.red("Command timed out"));
-        }
-        
-        if (err.result === CommandResult.Error) {
-            console.log(chalk.red("Command failed"));
-        }
-        
-        if (st.debugMode) {
-            console.log(err);
-        }
-
-    }
-    
-    
-    return spotTerminal(nextState);
-}
+export const spotTerminal = registerTerminalApplication(spotMenu);
