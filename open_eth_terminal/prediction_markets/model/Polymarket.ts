@@ -18,7 +18,7 @@ export async function fetchTopicsPolymarket() {
  * @param tagId The ID of the tag to fetch events for.
  * @link https://docs.polymarket.com/api-reference/
  */
-export async function fetchEventData(tagId: string) {
+export async function fetchEventDataByTagId(tagId: string) {
     const response = await axios.get(
         `https://gamma-api.polymarket.com/events`,
         {
@@ -35,12 +35,28 @@ export async function fetchEventData(tagId: string) {
  * @param tagId The ID of the tag to fetch markets for.
  * @link https://docs.polymarket.com/api-reference/
  */
-export async function fetchMarketData(tagId: string) {
+export async function fetchMarketDataByTagId(tagId: string) {
     const response = await axios.get(
         `https://gamma-api.polymarket.com/markets`,
         {
             params: {
                 tag_id: tagId,
+            },
+        }
+    );
+    return response.data;
+}
+
+export async function fetchTopMarketData(limit: number = 10) {
+    const response = await axios.get(
+        'https://gamma-api.polymarket.com/markets',
+        {
+            params: {
+                order: 'liquidityNum',
+                ascending: false,
+                closed: false,
+                limit,
+                volume_num_min: 100000
             },
         }
     );

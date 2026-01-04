@@ -5,7 +5,7 @@ import {CommandResultType, CommandState } from "../types.ts";
 import { registerTerminalApplication } from "../utils/program_loader.ts";
 import { menu_globals } from "../utils/menu_globals.ts";
 import PredictionMarketsData from "./model/index.ts";
-import { project, pipe, set, filter, toLower, lensProp, lensPath, view, defaultTo } from "ramda";
+import { project, pipe, set, filter, toLower, lensProp, map, lensPath, view, defaultTo, zip } from "ramda";
 
 const predictionMarketsViewHandler = (st: TerminalUserStateConfig) => async (tag?: string): Promise<CommandState> => {
     
@@ -17,7 +17,7 @@ const predictionMarketsViewHandler = (st: TerminalUserStateConfig) => async (tag
         };
     }
     
-    const markets = await PredictionMarketsData.polyMarketData.markets.get(tag);
+    const markets = await PredictionMarketsData.polyMarketData.markets.getByTagId(tag);
     
     console.log(markets);
     
@@ -51,6 +51,63 @@ const filterTags = (target: string) => pipe(
 
 const xPolymarketTagData = lensPath(["loadedContext", "predictionMarkets", "data"]);
 const xPredictionMarketType = lensPath(["loadedContext", "predictionMarkets", "type"]);
+
+const xPolymarketMarketsData = project(["id", "question", "outcomes", "outcomePrices", "volume", "liquidity"])
+
+const formatMarketsDataForTable = pipe(
+    map((r: any) => {
+        
+        const outcomes = JSON.parse(r.outcomes);
+        const outcomePrices = JSON.parse(r.outcomePrices);
+        const volume = r.volume;
+        const liquidity = r.liquidity;
+        const outcomesText = zip(outcomes, outcomePrices).map((o) => `${o[0]}: ${o[1]}`).join(", ");
+        
+        return [
+            r.id,
+            r.question,
+            `${outcomesText}\nVolume: ${volume}\nLiquidity: ${liquidity}`
+        ]
+    })
+)
+
+const polymarketMarketsTopFetchHandler = (st: TerminalUserStateConfig) => async (n?: string) => {
+    
+    if (st.logLevel) {
+        console.log("Fetching top markets");
+    }
+    
+    const limit = n ? Number(n) : 10;
+    const markets = await PredictionMarketsData.polyMarketData.markets.top(limit);
+    
+    const marketsData = pipe(
+        xPolymarketMarketsData,
+        formatMarketsDataForTable
+    )(markets);
+    
+    terminal.table([
+        ['ID', 'Question', 'Information'],
+        ...marketsData,
+    ], {
+        hasBorder: true,
+        contentHasMarkup: true,
+        borderChars: 'lightRounded',
+        borderAttr: { color: 'green' },
+        textAttr: { bgColor: 'default' },
+        firstRowTextAttr: { bgColor: 'green' },
+        width: 120,
+        fit: true
+    });
+    
+    if (st.logLevel) {
+        console.log(`${markets.length} markets fetched`);
+    }
+    
+    return {
+        result: { type: CommandResultType.Success },
+        state: st,
+    };
+}
 
 const polymarketMarketsTagsFetchHandler = (st: TerminalUserStateConfig) => async (search?: string) => {
     
@@ -120,6 +177,12 @@ const polymarketMarketsTagsSearchHandler = (st: TerminalUserStateConfig) => asyn
 }
 
 const predictionMarketsMenuOptions: MenuOption[] = [
+    {
+        name: "top",
+        command: "top [limit]",
+        description: "Fetch the top polymarket markets. If a limit is not provided, the top 10 markets by volume are returned.",
+        action: polymarketMarketsTopFetchHandler,
+    },
     {
         name: "markets",
         command: "markets [tag]",
