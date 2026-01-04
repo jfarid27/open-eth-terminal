@@ -4,12 +4,26 @@ A CLI Interface to Ethereum Financial Markets.
 
 ## Installation
 
+It is highly recommended to use Deno for this application. Node.js is supported but may have issues with some dependencies, and is generally insecure if a malicious actor gains access to your system.
+
+### Deno
+
+1.  Clone the repository.
+2.  Install dependencies:
+    ```bash
+    deno install -A --unstable --name=deno index.ts
+    ```
+
+### Node.js
+
 1.  Clone the repository.
 2.  Install dependencies:
     ```bash
     npm install
     ```
-3.  Set up your environment variables:
+    
+### Environment Variables
+Set up your environment variables:
     *   Create a `.env` file in the root directory.
     *   Add your CoinGecko API key (and other configurations as needed):
         ```env
@@ -20,8 +34,12 @@ A CLI Interface to Ethereum Financial Markets.
 
 ## Usage
 
-To start the application, run:
+### Deno
+```bash
+deno run start 
+```
 
+### Node.js
 ```bash
 npx tsx index.ts
 ```

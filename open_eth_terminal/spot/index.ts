@@ -22,7 +22,7 @@ const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: stri
         };
     }
 
-    let loadedTokenSymbol: string | undefined = symbolStr || getLoadedToken(st); 
+    const loadedTokenSymbol: string | undefined = symbolStr || getLoadedToken(st); 
 
     if (!loadedTokenSymbol) {
         console.log("No symbol provided");
