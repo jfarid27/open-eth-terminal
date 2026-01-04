@@ -3,7 +3,7 @@ import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import { Command } from "commander";
 import inquirer from "inquirer";
-import { CommandState, CommandResult, Menu, MenuOption, TerminalUserStateConfig } from "../types.ts";
+import { CommandState, CommandResultType, Menu, MenuOption, TerminalUserStateConfig } from "../types.ts";
 
 /**
  * Wrap a commander program into a resolvable promise from a menu option.
@@ -26,11 +26,11 @@ export function loadProgram(program: Command, menuOption: MenuOption, state: Ter
                 .catch(reject);
 
                 // Set the timeout only if the action callback is set
-                if (ops.timeout || state?.actionTimeout) {
+                if (ops?.timeout || state?.actionTimeout) {
                     setTimeout(() => {
                         console.log(chalk.red("Command timed out"));
                         reject({
-                            result: CommandResult.Timeout,
+                            result: { type: CommandResultType.Timeout },
                             state: state,
                         });
                     }, ops?.timeout || state?.actionTimeout);
@@ -41,11 +41,11 @@ export function loadProgram(program: Command, menuOption: MenuOption, state: Ter
 }
 
 /*
- * Run a terminal application from a menu.
+ * Register a terminal application from a menu. Note the function is curried to allow
+ * the terminal application runner to pass the menu registry and user state in separate calls.
  * 
- * @param st The terminal user state config.
- * @param menu The menu to run.
- * @returns A promise that resolves to the terminal user state config.
+ * @param menu The menu to register.
+ * @returns A function that takes a terminal user state config and returns a promise that resolves to the terminal user state config.
  */
 export const registerTerminalApplication = (menu: Menu) => {
     
@@ -92,24 +92,26 @@ export const registerTerminalApplication = (menu: Menu) => {
             const args = input.split(/\s+/);
             await program.parseAsync(args, { from: "user" });
             const result = await Promise.race(resultPs);
-            if (result && result.result === CommandResult.Back) {
+            if (result && result.result.type === CommandResultType.Back) {
                 return result.state;
             }
             
-            if (result && result.result === CommandResult.Exit) {
+            if (result && result.result.type === CommandResultType.Exit) {
                 process.exit(0);
             }
+            
+            return terminalApplication(result.state);
 
         } catch (err: any) {
-            if (err.result === CommandResult.Timeout) {
+            if (err.result?.type === CommandResultType.Timeout) {
                 console.log(chalk.red("Command timed out"));
             }
             
-            if (err.result === CommandResult.Error) {
+            if (err.result?.type === CommandResultType.Error) {
                 console.log(chalk.red("Command failed"));
             }
             
-            if (st.debugMode) {
+            if (st.logLevel) {
                 console.log(err);
             }
             console.log(chalk.red("Not a valid command"));

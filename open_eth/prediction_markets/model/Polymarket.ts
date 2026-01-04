@@ -5,7 +5,11 @@ import axios from "axios";
  * @link https://docs.polymarket.com/api-reference/
  */
 export async function fetchTopicsPolymarket() {
-    const response = await axios.get("https://gamma-api.polymarket.com/tags");
+    const response = await axios.get("https://gamma-api.polymarket.com/tags", {
+        params: {
+            limit: 1000,
+        },
+    });
     return response.data;
 }
 

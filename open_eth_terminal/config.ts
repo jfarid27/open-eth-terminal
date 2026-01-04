@@ -4,5 +4,5 @@ dotenv.config({ quiet: true });
 import { EnvironmentType } from "./types.ts";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT === "development" ? EnvironmentType.Development : EnvironmentType.Production;
-export const DEBUG: boolean = process.env.DEBUG === "true" || false;
+export const LOG_LEVEL: string | undefined = process.env.LOG_LEVEL || undefined;
 export const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;

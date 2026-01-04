@@ -4,10 +4,11 @@ import chalk from "chalk";
 import { spot } from "../../open_eth/spot/index.ts";
 import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
 import type { ActionOptions } from "../types.ts";
-import { loadProgram, registerTerminalApplication } from "../utils/program_loader.ts";
-import { TerminalUserStateConfig, EnvironmentType, Menu, MenuOption, CommandState, CommandResult } from "../types.ts";
+import { registerTerminalApplication } from "../utils/program_loader.ts";
+import { TerminalUserStateConfig, EnvironmentType, Menu, MenuOption, CommandState, CommandResultType } from "../types.ts";
 import { lensPath, view, pipe } from "ramda";
 import terminalKit from "terminal-kit";
+import { menu_globals } from "../utils/menu_globals.ts";
 const { terminal } = terminalKit;
 
 // Lens for the loaded token on the user state config.
@@ -21,7 +22,7 @@ const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: stri
     if (!COINGECKO_API_KEY) {
         console.log(chalk.red("No CoinGecko API key found"));
         return {
-            result: CommandResult.Error,
+            result: { type: CommandResultType.Error },
             state: st,
         };
     }
@@ -31,7 +32,7 @@ const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: stri
     if (!loadedTokenSymbol) {
         console.log("No symbol provided");
         return {
-            result: CommandResult.Error,
+            result: { type: CommandResultType.Error },
             state: st,
         };
     }
@@ -45,7 +46,7 @@ const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: stri
   
       const result = await spot(symbolObj, COINGECKO_API_KEY);
   
-      if (st.debugMode) {
+      if (st.logLevel) {
         console.log(result);
       }
   
@@ -57,13 +58,13 @@ const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: stri
         }
         console.log(chalk.red("Network Error"));
         return {
-            result: CommandResult.Error,
+            result: { type: CommandResultType.Error },
             state: st,
         };
     }
     
     return {
-        result: CommandResult.Success,
+        result: { type: CommandResultType.Success },
         state: st,
     };
 }
@@ -75,28 +76,7 @@ const spotMenuOptions: MenuOption[] = [
         description: "Fetch current price for the given symbol (default: ethereum)",
         action: spotPriceHandler,
     },
-    {
-        name: "back",
-        command: "back",
-        description: "Go back to the main menu",
-        action: (st: TerminalUserStateConfig) => async (ops?: ActionOptions) => {
-            return {
-                result: CommandResult.Back,
-                state: st,
-            };
-        },
-    },
-    {
-        name: "exit",
-        command: "exit",
-        description: "Exit the application",
-        action: (st: TerminalUserStateConfig) => async (ops?: ActionOptions) => { 
-            return {
-                result: CommandResult.Exit,
-                state: st,
-            };
-        },
-    },
+    ...menu_globals,
 ]
 
 const spotMenu: Menu = {

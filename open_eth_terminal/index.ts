@@ -1,14 +1,14 @@
-import inquirer from "inquirer";
 import chalk from "chalk";
 import { spotTerminal } from "./spot/index.ts";
 import { predictionMarketsTerminal } from "./prediction_markets/index.ts";
+import { menu_top } from "./utils/menu_globals.ts";
 
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import figlet from "figlet";
 
-import { ENVIRONMENT, DEBUG, COINGECKO_API_KEY } from "./config.ts";
-import { Menu, MenuOption, TerminalUserStateConfig, CommandResult } from "./types.ts";
+import { ENVIRONMENT, LOG_LEVEL, COINGECKO_API_KEY } from "./config.ts";
+import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "./types.ts";
 import { registerTerminalApplication } from "./utils/program_loader.ts";
 
 const menuOptions: MenuOption[] = [
@@ -19,7 +19,7 @@ const menuOptions: MenuOption[] = [
         action: (st: TerminalUserStateConfig) => async () => {
             const newState = await spotTerminal(st);
             return {
-                result: CommandResult.Success, // Assuming success if it returns
+                result: { type: CommandResultType.Success },
                 state: newState,
             };
         },
@@ -31,20 +31,12 @@ const menuOptions: MenuOption[] = [
         action: (st: TerminalUserStateConfig) => async () => {
             const newState = await predictionMarketsTerminal(st);
             return {
-                result: CommandResult.Success, // Assuming success if it returns
+                result: { type: CommandResultType.Success },
                 state: newState,
             };
         },
     },
-    {
-        name: "exit",
-        command: "exit",
-        description: "Exit the application",
-        action: (st: TerminalUserStateConfig) => async () => {
-             process.exit(0);
-             return { result: CommandResult.Exit, state: st };
-        },
-    },
+    ...menu_top
 ];
 
 const mainMenu: Menu = {
@@ -62,12 +54,11 @@ export async function startMain() {
   
   const state: TerminalUserStateConfig = {
     environment: ENVIRONMENT,
-    debugMode: DEBUG,
+    logLevel: LOG_LEVEL,
     apiKeys: {
         coingecko: COINGECKO_API_KEY,
     },
     loadedContext: {},
-    actionTimeout: 5000,
   };
   
   try {
