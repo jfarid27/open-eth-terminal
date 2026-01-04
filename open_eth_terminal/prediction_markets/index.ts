@@ -52,3 +52,5 @@ const predictionMarketsMenu: Menu = {
 
 
 export const predictionMarketsTerminal = registerTerminalApplication(predictionMarketsMenu);
+
+export default predictionMarketsTerminal;
