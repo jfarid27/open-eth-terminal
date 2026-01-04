@@ -1,5 +1,12 @@
-import type { ExchangeSymbol } from "./symbols.ts";
-import { ExchangeSymbolType } from "./symbols.ts";
+export enum ExchangeSymbolType {
+    CoinGecko = 'coingecko',
+}
+
+export interface ExchangeSymbol {
+    name: string;
+    id: string;
+    _type: ExchangeSymbolType;
+}
 
 /**
  * Generates an exchange symbol from the specified name, ID, and type. Useful for creating new exchange symbols.

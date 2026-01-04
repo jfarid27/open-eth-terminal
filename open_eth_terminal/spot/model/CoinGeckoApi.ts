@@ -1,6 +1,6 @@
 import axios from "axios";
 import { lensPath, view, defaultTo, pipe } from "ramda";
-import { ExchangeSymbol } from "../../types/symbols.ts";
+import { ExchangeSymbol } from "./types.ts";
 
 const COINGECKO_API = "https://api.coingecko.com/api/v3/simple/price";
 

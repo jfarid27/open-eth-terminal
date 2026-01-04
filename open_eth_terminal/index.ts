@@ -1,25 +1,42 @@
-import inquirer from "inquirer";
 import chalk from "chalk";
 import { spotTerminal } from "./spot/index.ts";
+import { predictionMarketsTerminal } from "./prediction_markets/index.ts";
+import { menu_top } from "./utils/menu_globals.ts";
 
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import figlet from "figlet";
 
-import { ENVIRONMENT, DEBUG, COINGECKO_API_KEY } from "./config.ts";
-import { Menu, MenuOption, TerminalUserStateConfig } from "./types.ts";
+import { ENVIRONMENT, LOG_LEVEL, COINGECKO_API_KEY } from "./config.ts";
+import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "./types.ts";
+import { registerTerminalApplication } from "./utils/program_loader.ts";
 
 const menuOptions: MenuOption[] = [
     {
         name: "spot",
+        command: "spot",
         description: "Fetch spot prices from various sources",
-        action: (st: TerminalUserStateConfig) => spotTerminal(st),
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await spotTerminal(st);
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
     },
     {
-        name: "exit",
-        description: "Exit the application",
-        action: (st: TerminalUserStateConfig) => process.exit(0),
+        name: "prediction markets",
+        command: "predictions",
+        description: "Fetch prediction markets prices from various sources",
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await predictionMarketsTerminal(st);
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
     },
+    ...menu_top
 ];
 
 const mainMenu: Menu = {
@@ -29,47 +46,7 @@ const mainMenu: Menu = {
     options: menuOptions,
 }
 
-export async function terminalMain(state: TerminalUserStateConfig) {
-
-  const tableDescriptions = mainMenu.options.map((option) => [option.name, option.description]);
-  terminal.table([
-      ['Option', 'Description'],
-      ...tableDescriptions,
-  ], {
-      hasBorder: true,
-      contentHasMarkup: true,
-      borderChars: 'lightRounded',
-      borderAttr: { color: 'blue' },
-      textAttr: { bgColor: 'default' },
-      firstRowTextAttr: { bgColor: 'blue' },
-      width: 60,
-      fit: true
-  });
-
-  const { action } = await inquirer.prompt([
-    {
-      type: "list",
-      name: "action",
-      message: mainMenu.messagePrompt,
-      choices: mainMenu.options.map((option) => option.name),
-    },
-  ]);
-
-  const option = mainMenu.options.find((option) => option.name === action);
-  if (!option) {
-    console.log(chalk.red("Invalid option"));
-    return terminalMain(state); // Retry
-  }
-  
-  // Execute action. If it returns a state, use it. Otherwise keep current state.
-  // We expect sub-menus to potentially return modified state.
-  const newState = await option.action(state);
-  
-  // Recursive step: call main with new or existing state
-  // Note: spotTerminal is now responsible for its own loop or recursion, 
-  // but if it returns here, we are back at main menu.
-  return terminalMain(newState || state);
-}
+export const terminalMain = registerTerminalApplication(mainMenu);
 
 export async function startMain() {
   // Only show banner on initial load
@@ -77,12 +54,17 @@ export async function startMain() {
   
   const state: TerminalUserStateConfig = {
     environment: ENVIRONMENT,
-    debugMode: DEBUG,
+    logLevel: LOG_LEVEL,
     apiKeys: {
         coingecko: COINGECKO_API_KEY,
     },
     loadedContext: {},
   };
   
-  return terminalMain(state); 
+  try {
+    await terminalMain(state); 
+  } catch (error) {
+    console.error("Error in main terminal:", error);
+    process.exit(1);
+  }
 }

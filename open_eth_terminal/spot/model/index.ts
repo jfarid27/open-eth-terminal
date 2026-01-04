@@ -1,5 +1,5 @@
-import { ExchangeSymbol, ExchangeSymbolType } from "../types/symbols.ts";
-import { fetchSpotCoingecko } from "./model/CoinGeckoApi.ts";
+import { ExchangeSymbol, ExchangeSymbolType } from "./types.ts";
+import { fetchSpotCoingecko } from "./CoinGeckoApi.ts";
 
 /**
  * Fetches the current price for a specified symbol.
