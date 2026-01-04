@@ -1,14 +1,11 @@
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import { Menu, MenuOption, TerminalUserStateConfig, PredictionMarketsType } from "../types.ts";
-import { ActionOptions, CommandResultType, CommandState } from "../types.ts";
-import chalk from "chalk";
+import {CommandResultType, CommandState } from "../types.ts";
 import { registerTerminalApplication } from "../utils/program_loader.ts";
-import inquirer from "inquirer";
-import { Command } from "commander";
 import { menu_globals } from "../utils/menu_globals.ts";
-import PolymarketData from "../../open_eth/prediction_markets/index.ts";
-import { project, map, pipe, set, filter, toLower, lensProp, over, lensPath, view, defaultTo } from "ramda";
+import PredictionMarketsData from "./model/index.ts";
+import { project, pipe, set, filter, toLower, lensProp, lensPath, view, defaultTo } from "ramda";
 
 const predictionMarketsViewHandler = (st: TerminalUserStateConfig) => async (tag?: string): Promise<CommandState> => {
     
@@ -20,7 +17,7 @@ const predictionMarketsViewHandler = (st: TerminalUserStateConfig) => async (tag
         };
     }
     
-    const markets = await PolymarketData.markets.get(tag);
+    const markets = await PredictionMarketsData.polyMarketData.markets.get(tag);
     
     console.log(markets);
     
@@ -60,7 +57,7 @@ const polymarketMarketsTagsFetchHandler = (st: TerminalUserStateConfig) => async
     if (st.logLevel) {
         console.log("Fetching tags");
     }
-    const tags = await PolymarketData.tags.get();
+    const tags = await PredictionMarketsData.polyMarketData.tags.get();
     const formattedTags = processTags(tags);
     
     if (st.logLevel) {

@@ -1,15 +1,10 @@
-import inquirer from "inquirer";
-import { Command } from "commander";
 import chalk from "chalk";
-import { spot } from "../../open_eth/spot/index.ts";
-import { ExchangeSymbolType } from "../../open_eth/types/symbols.ts";
-import type { ActionOptions } from "../types.ts";
+import { spot } from "./model/index.ts";
+import { ExchangeSymbolType } from "./model/types.ts";
 import { registerTerminalApplication } from "../utils/program_loader.ts";
 import { TerminalUserStateConfig, EnvironmentType, Menu, MenuOption, CommandState, CommandResultType } from "../types.ts";
-import { lensPath, view, pipe } from "ramda";
-import terminalKit from "terminal-kit";
+import { lensPath, view } from "ramda";
 import { menu_globals } from "../utils/menu_globals.ts";
-const { terminal } = terminalKit;
 
 // Lens for the loaded token on the user state config.
 const tokenLens = lensPath(["loadedContext", "token", "symbol"]);
