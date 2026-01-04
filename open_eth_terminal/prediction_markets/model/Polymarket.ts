@@ -41,12 +41,20 @@ export async function fetchMarketDataByTagId(tagId: string) {
         {
             params: {
                 tag_id: tagId,
+                closed: false,
+                order: 'liquidityNum',
+                ascending: false,
             },
         }
     );
     return response.data;
 }
 
+/**
+ * Fetches the list of available markets from Polymarket.
+ * @param limit The number of markets to fetch.
+ * @link https://docs.polymarket.com/api-reference/
+ */
 export async function fetchTopMarketData(limit: number = 10) {
     const response = await axios.get(
         'https://gamma-api.polymarket.com/markets',

@@ -53,6 +53,8 @@ export interface TerminalUserStateConfig {
 
 export type ActionOptions = any;
 
+export type ActionHandler = (st: TerminalUserStateConfig) => (...args: any[]) => Promise<CommandState>;
+
 /**
  * Abstract menu option for terminal state.
  */
@@ -60,7 +62,7 @@ export interface MenuOption {
     name: string;
     command: string;
     description: string;
-    action: (st: TerminalUserStateConfig) => (...args: any[]) => Promise<CommandState>;
+    action: ActionHandler;
 }
 
 /**
