@@ -13,6 +13,7 @@ export enum EnvironmentType {
  */
 export interface APIKeyConfig {
     coingecko?: string;
+    alphavantage?: string;
 }
 
 export interface TokenContext {
@@ -99,3 +100,51 @@ export interface CommandState {
     result: CommandResult;
     state: TerminalUserStateConfig;
 }
+
+export enum ExchangeSymbolType {
+    CoinGecko = 'coingecko',
+    AlphaVantage = 'alphavantage',
+}
+
+export interface ExchangeSymbol {
+    name: string;
+    id: string;
+    _type: ExchangeSymbolType;
+}
+
+/**
+ * Generates an exchange symbol from the specified name, ID, and type. Useful for creating new exchange symbols.
+ *
+ * @param name Name of the symbol.
+ * @param id ID of the symbol.
+ * @param type Type of the symbol.
+ */
+export function generateExchangeSymbol(name: string, id: string, type: ExchangeSymbolType): ExchangeSymbol {
+    switch (type) {
+        case ExchangeSymbolType.CoinGecko:
+            return {
+                name,
+                id,
+                _type: ExchangeSymbolType.CoinGecko,
+            };
+        case ExchangeSymbolType.AlphaVantage:
+            return {
+                name,
+                id,
+                _type: ExchangeSymbolType.AlphaVantage,
+            }
+    }
+}
+
+/**
+ * Available default exchange symbols from CoinGecko.
+ */
+const CoinGeckoSymbols: ExchangeSymbol[] = [
+    generateExchangeSymbol("Bitcoin", "bitcoin", ExchangeSymbolType.CoinGecko),
+    generateExchangeSymbol("Ethereum", "ethereum", ExchangeSymbolType.CoinGecko),
+]
+
+/**
+ * Union of all available exchange symbols.
+ */
+export const ExchangeSymbols: ExchangeSymbol[] = [...CoinGeckoSymbols];

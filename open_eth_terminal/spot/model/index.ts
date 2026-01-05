@@ -1,4 +1,4 @@
-import { ExchangeSymbol, ExchangeSymbolType } from "./types.ts";
+import { ExchangeSymbol, ExchangeSymbolType } from "../../types.ts";
 import { fetchSpotCoingecko } from "./CoinGeckoApi.ts";
 
 /**
@@ -14,4 +14,8 @@ export async function spot(symbol: ExchangeSymbol, COINGECKO_API_KEY: string) {
     }
 }
 
-export default spot;
+export async function chart(symbol: ExchangeSymbol, COINGECKO_API_KEY: string) {
+    return undefined;
+}
+
+export default { spot, chart };

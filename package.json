@@ -23,6 +23,7 @@
     "start": "npx tsx index.ts"
   },
   "dependencies": {
+    "@observablehq/plot": "^0.6.17",
     "@types/terminal-kit": "^2.5.7",
     "axios": "^1.13.2",
     "chalk": "^5.6.2",
@@ -30,12 +31,15 @@
     "dotenv": "^17.2.3",
     "figlet": "^1.9.4",
     "inquirer": "^13.1.0",
+    "jsdom": "^27.0.1",
+    "open": "^11.0.0",
     "ramda": "^0.32.0",
     "terminal-kit": "^3.1.2",
     "ts-pattern": "^5.9.0"
   },
   "devDependencies": {
     "@types/figlet": "^1.7.0",
+    "@types/jsdom": "^27.0.0",
     "@types/node": "^25.0.3",
     "@types/ramda": "^0.31.1",
     "typescript": "^5.9.3"
