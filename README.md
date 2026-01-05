@@ -1,5 +1,7 @@
 # Open Eth Terminal
 
+![](https://github.com/jfarid27/open-eth-terminal/actions/workflows/ci-test.yml/badge.svg)
+
 A CLI Interface to Ethereum Financial Markets.
 
 ## Installation

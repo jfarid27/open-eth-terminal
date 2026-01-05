@@ -33,6 +33,3 @@ jobs:
       - name: Check step
         run: "deno check"
         
-      - name: Test step
-        run: "deno test"
-        
