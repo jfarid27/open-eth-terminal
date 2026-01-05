@@ -331,7 +331,6 @@ export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUser
         let marketsData = pipe(
             xPolymarketMarketsData,
             formatMarketsDataForTable,
-            tap(console.log),
             filter((market: any) => term ? market[1].toLowerCase().includes(term.toLowerCase()) : true),
             map((market: any) => {
                 return [market[1] + "\nSlug: " + market[0], market[2]];
