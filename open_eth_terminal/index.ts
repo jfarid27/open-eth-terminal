@@ -5,6 +5,7 @@ import stocksTerminal from "./stocks/index.ts";
 import { menu_top } from "./utils/menu_globals.ts";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import newsTerminal from "./news/index.ts";
 
 import figlet from "figlet";
 
@@ -26,11 +27,11 @@ const menuOptions: MenuOption[] = [
         },
     },
     {
-        name: "prediction markets",
-        command: "predictions",
-        description: "Fetch prediction markets prices from various sources",
+        name: "stocks",
+        command: "stocks",
+        description: "Fetch stock prices from various sources",
         action: (st: TerminalUserStateConfig) => async () => {
-            const newState = await predictionMarketsTerminal(st);
+            const newState = await stocksTerminal(st);
             return {
                 result: { type: CommandResultType.Success },
                 state: newState,
@@ -38,11 +39,23 @@ const menuOptions: MenuOption[] = [
         },
     },
     {
-        name: "stocks",
-        command: "stocks",
-        description: "Fetch stock prices from various sources",
+        name: "news",
+        command: "news",
+        description: "Fetch news from various sources",
         action: (st: TerminalUserStateConfig) => async () => {
-            const newState = await stocksTerminal(st);
+            const newState = await newsTerminal(st);
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
+    },
+    {
+        name: "prediction markets",
+        command: "predictions",
+        description: "Fetch prediction markets prices from various sources",
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await predictionMarketsTerminal(st);
             return {
                 result: { type: CommandResultType.Success },
                 state: newState,
