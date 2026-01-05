@@ -1,4 +1,9 @@
-import { fetchTopicsPolymarket, fetchEventDataByTagId, fetchMarketDataByTagId, fetchTopMarketData } from "./Polymarket.ts";
+import {
+    fetchTopicsPolymarket, fetchEventDataByTagId,
+    fetchMarketDataByTagId, fetchTopMarketData,
+    fetchMarketDataBySlug,
+    fetchEventDataBySlug,
+} from "./Polymarket.ts";
 
 const PolymarketData = {
     tags: {
@@ -7,9 +12,15 @@ const PolymarketData = {
     events: {
         getByTagId: fetchEventDataByTagId,
     },
+    event: {
+        getBySlug: fetchEventDataBySlug,
+    },
     markets: {
         getByTagId: fetchMarketDataByTagId,
         top: fetchTopMarketData,
+    },
+    market: {
+        getBySlug: fetchMarketDataBySlug,
     },
 }
 

@@ -14,6 +14,30 @@ export async function fetchTopicsPolymarket() {
 }
 
 /**
+ * Fetches the event data for a given slug from Polymarket.
+ * @param slug The slug of the event to fetch events for.
+ * @link https://docs.polymarket.com/api-reference/
+ */
+export async function fetchEventDataBySlug(slug: string) {
+    const response = await axios.get(
+        `https://gamma-api.polymarket.com/events/slug/${slug}`
+    );
+    return response.data;
+}
+
+/**
+ * Fetches the market data for a given slug from Polymarket.
+ * @param slug The slug of the market to fetch data for.
+ * @link https://docs.polymarket.com/api-reference/
+ */
+export async function fetchMarketDataBySlug(slug: string) {
+    const response = await axios.get(
+        `https://gamma-api.polymarket.com/markets/slug/${slug}`
+    );
+    return response.data;
+}
+
+/**
  * Fetches the list of available events from Polymarket.
  * @param tagId The ID of the tag to fetch events for.
  * @link https://docs.polymarket.com/api-reference/
