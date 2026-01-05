@@ -6,6 +6,8 @@ import {
     polymarketMarketsTagsFetchHandler,
     polymarketMarketsTagsSearchHandler,
     predictionMarketsViewHandler,
+    predictionMarketViewHandler,
+    predictionEventViewHandler,
  } from './actions/polymarket.ts';
 
 /**
@@ -17,6 +19,18 @@ const predictionMarketsMenuOptions: MenuOption[] = [
         command: "top [limit]",
         description: "Fetch the top polymarket markets. If a limit is not provided, the top 10 markets by volume are returned.",
         action: polymarketMarketsTopFetchHandler,
+    },
+    {
+        name: "event",
+        command: "event [slug]",
+        description: "Fetch a specific event by slug.",
+        action: predictionEventViewHandler,
+    },
+    {
+        name: "market",
+        command: "market [slug]",
+        description: "Fetch a specific market by slug.",
+        action: predictionMarketViewHandler,
     },
     {
         name: "markets",

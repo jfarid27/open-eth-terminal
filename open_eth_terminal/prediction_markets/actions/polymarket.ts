@@ -5,13 +5,17 @@
  * @see {@link ActionHandler}
  */
 
-import { project, pipe, set, filter, toLower, lensProp, map, lensPath, view, defaultTo, zip } from "ramda";
+import { project, pipe, set, filter, toLower, lensProp, map,
+    lensPath, view, defaultTo, zip, tap,
+    props
+} from "ramda";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import PredictionMarketsData from "./../model/index.ts";
 import {CommandResultType, CommandState, PredictionMarketsType } from "./../../types.ts";
 import { TerminalUserStateConfig } from "./../../types.ts";
 import { ActionHandler } from "./../../types.ts";
+import chalk from "chalk";
 
 /**
  * Lens path for predictions markets data on the User State.
@@ -83,6 +87,155 @@ const filterTags = (target: string) => pipe(
     processTags,
     filter(stringLabelIncludes(target))
 );
+
+/**
+ * Maps the polymarket event data for outcomes and outcome prices to a string array.
+ */
+const outcomePricesMapper = (r: string): string[] => {
+    try {
+        const parsed = JSON.parse(r);
+        return parsed as string[];
+    } catch (error) {
+        return ["NA"];
+    }
+}
+
+/**
+ * Zips the polymarket event data for outcomes and outcome prices.
+ */
+const zipEventOutcomePrices = (r: any) => {
+    return zip(
+        outcomePricesMapper(r.outcomes),
+        outcomePricesMapper(r.outcomePrices)
+    );
+}
+/**
+ * Fetches event for the given event slug.
+ * @param st Terminal User State 
+ * @param slug Polymarket Defined Event Slug. 
+ * @returns CommandState 
+ */
+export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+    
+    if (!slug) {
+        console.log("No slug provided");
+        return {
+            result: { type: CommandResultType.Success },
+            state: st,
+        };
+    }
+    
+    const response = await PredictionMarketsData.polyMarketData.event.getBySlug(slug);
+    
+    const xPolymarketMarketData = props([
+        "slug",
+        "active",
+        "liquidity",
+        "volume",
+        "competitive"
+    ]);
+    
+    const marketData = pipe(
+        xPolymarketMarketData,
+    )(response) as string[];
+    
+    const outcomeData = pipe(
+        filter((r:any) => !r.closed),
+        map((r:any) => {
+            return [r.question, zipEventOutcomePrices(r)];
+        }),
+    )(response.markets)
+    
+    console.log(chalk.blue.bold("Market Data"))
+    console.log(chalk.blue("Title: ") + response.title)
+    console.log(chalk.blue("Description: ") + response.description)
+
+    terminal.table([
+        ['Slug', 'Active', 'Liquidity', 'Volume', 'Competitive'],
+        marketData,
+    ], {
+        hasBorder: true,
+        contentHasMarkup: true,
+        borderChars: 'lightRounded',
+        borderAttr: { color: 'green' },
+        textAttr: { bgColor: 'default' },
+        firstRowTextAttr: { bgColor: 'green' },
+        width: 120,
+        fit: true
+    });
+    
+    console.log(chalk.blue.bold("Outcome Data"))
+    
+    for (const [question, outcomePrices] of outcomeData) {
+        terminal.table([
+            [question, ""],
+            ['Outcome', 'Price'],
+            ...outcomePrices,
+        ], {
+            hasBorder: true,
+            contentHasMarkup: true,
+            borderChars: 'lightRounded',
+            borderAttr: { color: 'green' },
+            textAttr: { bgColor: 'default' },
+            firstRowTextAttr: { bgColor: 'blue' },
+            width: 120,
+            fit: true
+        });
+    }
+    return {
+        result: { type: CommandResultType.Success },
+        state: st,
+    };
+}
+
+/**
+ * Fetches market for the given market id.
+ * @param st Terminal User State 
+ * @param tag Polymarket Defined Market ID. 
+ * @returns CommandState 
+ */
+export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+    
+    if (!slug) {
+        console.log("No slug provided");
+        return {
+            result: { type: CommandResultType.Success },
+            state: st,
+        };
+    }
+    
+    const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
+    
+    const xPolymarketMarketData = project([
+        "slug",
+        "active",
+        "liquidity",
+        "volume",
+        "openInterest"
+    ])
+    
+    const marketData = pipe(
+        xPolymarketMarketData
+    )(response) as string[];
+    
+    terminal.table([
+        ['ID', 'Question', 'Information'],
+        marketData,
+    ], {
+        hasBorder: true,
+        contentHasMarkup: true,
+        borderChars: 'lightRounded',
+        borderAttr: { color: 'green' },
+        textAttr: { bgColor: 'default' },
+        firstRowTextAttr: { bgColor: 'green' },
+        width: 120,
+        fit: true
+    });
+    return {
+        result: { type: CommandResultType.Success },
+        state: st,
+    };
+}
 
 /**
  * Fetches markets linked to the given tag (default: all)
@@ -192,7 +345,7 @@ export const polymarketMarketsTagsFetchHandler: ActionHandler = (st: TerminalUse
     const newSt1 = set(xPolymarketTagData, formattedTags, st);
     const newSt2 = set(xPredictionMarketType, PredictionMarketsType.Polymarket, newSt1);
     
-    console.log("Market data added to storage. Search with 'search <term>'")
+    console.log("Tags added to storage. Search with 'search <term>'")
     return {
         result: { type: CommandResultType.Success },
         state: newSt2,
