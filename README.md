@@ -1,5 +1,7 @@
 # Open Eth Terminal
 
+![](https://github.com/jfarid27/open-eth-terminal/actions/workflows/ci-test.yml/badge.svg)
+
 A CLI Interface to Ethereum Financial Markets.
 
 ## Installation
@@ -44,19 +46,29 @@ deno run start
 npx tsx index.ts
 ```
 
-## Commands
+## Features
 
-### Main Menu
--   **spot**: Enter the Spot Market Application to fetch token prices.
--   **exit**: Exit the application.
+### General Usage
 
-### Spot Market Application
-Once inside the Spot Market application, you can use the following commands:
+Start the system, and type specific commands to either enter into a new menu, or perform an action.
+Actions will dump data and information in specific locations like the terminal itself, or files.
 
--   **price <SYMBOL>**: Fetch the current price for a specific symbol (e.g., `price bitcoin`, `price ethereum`).
--   **back**: Return to the Main Menu.
--   **exit**: Exit the application completely.
+### Scripting
 
+Scripting is a useful tool for users who want to perform automated analysis.
+
+Create a scripts directory in the top level folder, and create a script file with any extension. You
+can then run a script with the script command, and pass the filename as an argument. An example
+script file could be as simple as the example below.
+
+```bash
+stocks
+spot IBM
+back
+spot
+price ethereum
+back
+```
 
 ## Development
 
