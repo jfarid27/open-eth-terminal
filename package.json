@@ -34,6 +34,7 @@
     "jsdom": "^27.0.1",
     "open": "^11.0.0",
     "ramda": "^0.32.0",
+    "rss-parser": "^3.13.0",
     "terminal-kit": "^3.1.2",
     "ts-pattern": "^5.9.0"
   },

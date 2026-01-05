@@ -62,11 +62,16 @@ can then run a script with the script command, and pass the filename as an argum
 script file could be as simple as the example below.
 
 ```bash
-stocks
-spot IBM
+news
+reddit wallstreetbets 10
+reddit ethereum 10
 back
-spot
+stocks
+spot TSLA
+back
+crypto
 price ethereum
+price aave
 back
 ```
 
