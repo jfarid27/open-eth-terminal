@@ -41,6 +41,12 @@ export interface LoadedContext {
     predictionMarkets?: PredictionMarketsContext;
 }
 
+export interface ScriptContext {
+    filename?: string;
+    currentCommand?: string;
+    tailCommands?: string[];
+}
+
 /**
  * Configuration for the terminal user state.
  */
@@ -50,6 +56,7 @@ export interface TerminalUserStateConfig {
     apiKeys: APIKeyConfig;
     loadedContext: LoadedContext;
     actionTimeout?: number;
+    scriptContext: ScriptContext;
 }
 
 export type ActionOptions = any;

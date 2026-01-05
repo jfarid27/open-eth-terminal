@@ -3,6 +3,8 @@ import spotTerminal from "./spot/index.ts";
 import predictionMarketsTerminal from "./prediction_markets/index.ts";
 import stocksTerminal from "./stocks/index.ts";
 import { menu_top } from "./utils/menu_globals.ts";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import figlet from "figlet";
 
@@ -47,6 +49,36 @@ const menuOptions: MenuOption[] = [
             };
         },
     },
+    {
+        name: "script",
+        command: "script [filename]",
+        description: "Run a script from the scripts folder with a specified filename",
+        action: (st: TerminalUserStateConfig) => async (filename: string) => {
+             try {
+                const scriptPath = join(process.cwd(), "scripts", filename);
+                const fileContent = await readFile(scriptPath, "utf-8");
+                const [currentCommand, ...tailCommands] = fileContent.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+
+                return {
+                    result: { type: CommandResultType.Success },
+                    state: {
+                        ...st,
+                        scriptContext: {
+                            filename,
+                            currentCommand,
+                            tailCommands,
+                        }
+                    },
+                };
+            } catch (error) {
+                console.log(chalk.red(`Failed to load script: ${error}`));
+                return {
+                    result: { type: CommandResultType.Error },
+                    state: st,
+                };
+            }
+        },
+    },
     ...menu_top
 ];
 
@@ -71,6 +103,7 @@ export async function startMain() {
         alphavantage: ALPHAVANTAGE_API_KEY,
     },
     loadedContext: {},
+    scriptContext: {}
   };
   
   try {

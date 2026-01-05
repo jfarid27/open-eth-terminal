@@ -50,33 +50,46 @@ export function loadProgram(program: Command, menuOption: MenuOption, state: Ter
 export const registerTerminalApplication = (menu: Menu) => {
     
     async function terminalApplication(st: TerminalUserStateConfig): Promise<TerminalUserStateConfig> {
-        console.log(chalk.blue(menu.name));
-        const tableDescriptions = menu.options.map((option) => [option.name, option.command, option.description]);
+        // Only show menu if not in script mode
+        if (!st.scriptContext?.currentCommand) {
+            console.log(chalk.blue(menu.name));
+            const tableDescriptions = menu.options.map((option) => [option.name, option.command, option.description]);
 
-        terminal.table([
-            ['Name', 'Command', 'Description'],
-            ...tableDescriptions,
-        ], {
-            hasBorder: true,
-            contentHasMarkup: true,
-            borderChars: 'lightRounded',
-            borderAttr: { color: 'cyan' },
-            textAttr: { bgColor: 'default' },
-            firstRowTextAttr: { bgColor: 'cyan' },
-            width: 60,
-            fit: true
-        });
+            terminal.table([
+                ['Name', 'Command', 'Description'],
+                ...tableDescriptions,
+            ], {
+                hasBorder: true,
+                contentHasMarkup: true,
+                borderChars: 'lightRounded',
+                borderAttr: { color: 'cyan' },
+                textAttr: { bgColor: 'default' },
+                firstRowTextAttr: { bgColor: 'cyan' },
+                width: 60,
+                fit: true
+            });
+        }
+        console.log(chalk.blue(menu.name));
         
         try {
-            const { command } = await inquirer.prompt([
-              {
-                type: "input",
-                name: "command",
-                message: menu.name + " >",
-              },
-            ]);
+            let input = "";
+            let isScriptExecution = false;
 
-            const input = command.trim();
+            if (st.scriptContext?.currentCommand) {
+                input = st.scriptContext.currentCommand;
+                console.log(chalk.yellow(`Executing script command: ${input}`));
+                isScriptExecution = true;
+            } else {
+                const { command } = await inquirer.prompt([
+                {
+                    type: "input",
+                    name: "command",
+                    message: menu.name + " >",
+                },
+                ]);
+                input = command?.trim();
+            }
+
             if (!input) return terminalApplication(st);
 
             const program = new Command();
@@ -86,12 +99,26 @@ export const registerTerminalApplication = (menu: Menu) => {
             });
 
             const resultPs = menu.options.map((option) => {
+                // If we are executing a script, advance the command pointer
+                if (isScriptExecution) {
+                    const [nextCommand, ...rest] = st.scriptContext.tailCommands || [];
+                    const nextScriptState = {
+                        ...st,
+                        scriptContext: {
+                            ...st.scriptContext,
+                            currentCommand: nextCommand,
+                            tailCommands: rest
+                        }
+                    };
+                    return loadProgram(program, option, nextScriptState);
+                }
                 return loadProgram(program, option, st);
             });
 
             const args = input.split(/\s+/);
             await program.parseAsync(args, { from: "user" });
             const result = await Promise.race(resultPs);
+
             if (result && result.result.type === CommandResultType.Back) {
                 return result.state;
             }
@@ -99,8 +126,11 @@ export const registerTerminalApplication = (menu: Menu) => {
             if (result && result.result.type === CommandResultType.Exit) {
                 process.exit(0);
             }
+
+            let nextState = result.state;
             
-            return terminalApplication(result.state);
+            
+            return terminalApplication(nextState);
 
         } catch (err: any) {
             if (err.result?.type === CommandResultType.Timeout) {
@@ -111,15 +141,31 @@ export const registerTerminalApplication = (menu: Menu) => {
                 console.log(chalk.red("Command failed"));
             }
             
+            // If in script execution, maybe we should stop or continue?
+            // Usually scripts stop on error, but the prompt didn't specify.
+            // We'll log and continue (which recurses).
+            // But if we recurse with 'st', we might infinite loop on the same failing command if we don't advance!
+            
             if (st.logLevel) {
                 console.log(err);
             }
             console.log(chalk.red("Not a valid command"));
+            
+            // Fix for script loop on error:
+            // If error occurred during script execution, we must advance or abort.
+            // Let's abort script to prevent infinite error loops.
+            if (st.scriptContext?.currentCommand) {
+                console.log(chalk.red("Script execution aborted due to error."));
+                const abortState = {
+                    ...st,
+                    scriptContext: {} // Clear script context
+                };
+                return terminalApplication(abortState);
+            }
+
             return terminalApplication(st);
         }
         
-        return terminalApplication(st);
-
     }
     
     return terminalApplication;
