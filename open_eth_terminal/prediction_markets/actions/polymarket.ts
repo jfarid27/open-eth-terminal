@@ -30,7 +30,7 @@ const xPredictionMarketType = lensPath(["loadedContext", "predictionMarkets", "t
 /**
  * Lens path for polymarket prediction market properties returned by the polymarket API.
  */
-const xPolymarketMarketsData = project(["id", "question", "outcomes", "outcomePrices", "volume", "liquidity"])
+const xPolymarketMarketsData = project(["slug", "question", "outcomes", "outcomePrices", "volume", "liquidity"])
 
 
 /**
@@ -46,7 +46,7 @@ const formatMarketsDataForTable = pipe(
         const outcomesText = zip(outcomes, outcomePrices).map((o) => `${o[0]}: ${o[1]}`).join(", ");
         
         return [
-            r.id,
+            r.slug,
             r.question,
             `${outcomesText}\nVolume: ${volume}\nLiquidity: ${liquidity}`
         ]
@@ -101,6 +101,16 @@ const outcomePricesMapper = (r: string): string[] => {
 }
 
 /**
+ * Processes the outcome data for the given market.
+ */
+const processOutcomeData = pipe(
+    filter((r:any) => !r.closed),
+    map((r:any) => {
+        return [r.question, zipEventOutcomePrices(r)];
+    }),
+)
+
+/**
  * Zips the polymarket event data for outcomes and outcome prices.
  */
 const zipEventOutcomePrices = (r: any) => {
@@ -140,10 +150,7 @@ export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateC
     )(response) as string[];
     
     const outcomeData = pipe(
-        filter((r:any) => !r.closed),
-        map((r:any) => {
-            return [r.question, zipEventOutcomePrices(r)];
-        }),
+        processOutcomeData,
     )(response.markets)
     
     console.log(chalk.blue.bold("Market Data"))
@@ -206,20 +213,27 @@ export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserState
     
     const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
     
-    const xPolymarketMarketData = project([
-        "slug",
+    const xPolymarketMarketData = props([
         "active",
-        "liquidity",
-        "volume",
-        "openInterest"
+        "liquidityNum",
+        "volumeNum",
     ])
     
     const marketData = pipe(
         xPolymarketMarketData
     )(response) as string[];
     
+    const outcomeData = pipe(
+        processOutcomeData 
+    )([response])
+    
+    console.log(chalk.blue.bold("Market Data"))
+    console.log(chalk.blue("Question: " + response.question))
+    console.log(chalk.blue("Slug: " + response.slug))
+    console.log(chalk.yellow("Description: " + response.description))
+    
     terminal.table([
-        ['ID', 'Question', 'Information'],
+        ['Active', 'Liquidity', 'Volume'],
         marketData,
     ], {
         hasBorder: true,
@@ -231,6 +245,24 @@ export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserState
         width: 120,
         fit: true
     });
+
+    for (const [question, outcomePrices] of outcomeData) {
+        terminal.table([
+            [question, ""],
+            ['Outcome', 'Price'],
+            ...outcomePrices,
+        ], {
+            hasBorder: true,
+            contentHasMarkup: true,
+            borderChars: 'lightRounded',
+            borderAttr: { color: 'green' },
+            textAttr: { bgColor: 'default' },
+            firstRowTextAttr: { bgColor: 'blue' },
+            width: 120,
+            fit: true
+        });
+    }
+
     return {
         result: { type: CommandResultType.Success },
         state: st,
@@ -299,11 +331,15 @@ export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUser
         let marketsData = pipe(
             xPolymarketMarketsData,
             formatMarketsDataForTable,
-            filter((market: any) => term ? market[1].toLowerCase().includes(term.toLowerCase()) : true)
+            tap(console.log),
+            filter((market: any) => term ? market[1].toLowerCase().includes(term.toLowerCase()) : true),
+            map((market: any) => {
+                return [market[1] + "\nSlug: " + market[0], market[2]];
+            })
         )(markets);
         
         terminal.table([
-            ['ID', 'Question', 'Information'],
+            ['Question', 'Information'],
             ...marketsData,
         ], {
             hasBorder: true,

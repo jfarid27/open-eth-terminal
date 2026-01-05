@@ -31,9 +31,9 @@ export async function fetchEventDataBySlug(slug: string) {
  * @link https://docs.polymarket.com/api-reference/
  */
 export async function fetchMarketDataBySlug(slug: string) {
-    const response = await axios.get(
-        `https://gamma-api.polymarket.com/markets/slug/${slug}`
-    );
+
+    const url = `https://gamma-api.polymarket.com/markets/slug/${slug}`;
+    const response = await axios.get(url);
     return response.data;
 }
 
