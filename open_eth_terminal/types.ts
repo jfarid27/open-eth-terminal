@@ -17,8 +17,8 @@ export enum APIKeyTypes {
  * Configuration for the API keys.
  */
 export interface APIKeyConfig {
-    [APIKeyTypes.CoinGecko]: string;
-    [APIKeyTypes.Alphavantage]: string;
+    [APIKeyTypes.CoinGecko]?: string;
+    [APIKeyTypes.Alphavantage]?: string;
 }
 
 export interface TokenContext {

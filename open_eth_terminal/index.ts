@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import spotTerminal from "./spot/index.ts";
+import cryptoTerminal from "./crypto/index.ts";
 import predictionMarketsTerminal from "./prediction_markets/index.ts";
 import stocksTerminal from "./stocks/index.ts";
 import { menu_top } from "./utils/menu_globals.ts";
@@ -14,11 +14,11 @@ import { registerTerminalApplication } from "./utils/program_loader.ts";
 
 const menuOptions: MenuOption[] = [
     {
-        name: "spot",
-        command: "spot",
-        description: "Fetch spot prices from various sources",
+        name: "crypto",
+        command: "crypto",
+        description: "Fetch crypto prices from various sources",
         action: (st: TerminalUserStateConfig) => async () => {
-            const newState = await spotTerminal(st);
+            const newState = await cryptoTerminal(st);
             return {
                 result: { type: CommandResultType.Success },
                 state: newState,

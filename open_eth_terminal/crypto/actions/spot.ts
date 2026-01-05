@@ -1,10 +1,10 @@
 import chalk from "chalk";
-import { spot } from "./../model/index.ts";
-import { ExchangeSymbolType } from "./../../types.ts";
+import { spot } from "../model/index.ts";
+import { ExchangeSymbolType } from "../../types.ts";
 import {
     TerminalUserStateConfig, EnvironmentType,
      CommandState, CommandResultType
-} from "./../../types.ts";
+} from "../../types.ts";
 import { lensPath, view } from "ramda";
 
 // Lens for the loaded token on the user state config.
