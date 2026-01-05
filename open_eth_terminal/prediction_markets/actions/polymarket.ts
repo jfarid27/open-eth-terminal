@@ -286,42 +286,44 @@ export const predictionMarketsViewHandler: ActionHandler = (st: TerminalUserStat
  * @param n Number of markets to fetch
  * @returns CommandState
  */
-export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUserStateConfig) => async (n?: string) => {
+export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUserStateConfig) =>
+    async (n?: string, term?: string) => {
     
-    if (st.logLevel) {
-        console.log("Fetching top markets");
-    }
-    
-    const limit = n ? Number(n) : 10;
-    const markets = await PredictionMarketsData.polyMarketData.markets.top(limit);
-    
-    const marketsData = pipe(
-        xPolymarketMarketsData,
-        formatMarketsDataForTable
-    )(markets);
-    
-    terminal.table([
-        ['ID', 'Question', 'Information'],
-        ...marketsData,
-    ], {
-        hasBorder: true,
-        contentHasMarkup: true,
-        borderChars: 'lightRounded',
-        borderAttr: { color: 'green' },
-        textAttr: { bgColor: 'default' },
-        firstRowTextAttr: { bgColor: 'green' },
-        width: 120,
-        fit: true
-    });
-    
-    if (st.logLevel) {
-        console.log(`${markets.length} markets fetched`);
-    }
-    
-    return {
-        result: { type: CommandResultType.Success },
-        state: st,
-    };
+        if (st.logLevel) {
+            console.log("Fetching top markets");
+        }
+        
+        const limit = n ? Number(n) : 10;
+        const markets = await PredictionMarketsData.polyMarketData.markets.top(limit);
+        
+        let marketsData = pipe(
+            xPolymarketMarketsData,
+            formatMarketsDataForTable,
+            filter((market: any) => term ? market[1].toLowerCase().includes(term.toLowerCase()) : true)
+        )(markets);
+        
+        terminal.table([
+            ['ID', 'Question', 'Information'],
+            ...marketsData,
+        ], {
+            hasBorder: true,
+            contentHasMarkup: true,
+            borderChars: 'lightRounded',
+            borderAttr: { color: 'green' },
+            textAttr: { bgColor: 'default' },
+            firstRowTextAttr: { bgColor: 'green' },
+            width: 120,
+            fit: true
+        });
+        
+        if (st.logLevel) {
+            console.log(`${markets.length} markets fetched`);
+        }
+        
+        return {
+            result: { type: CommandResultType.Success },
+            state: st,
+        };
 }
 
 /**

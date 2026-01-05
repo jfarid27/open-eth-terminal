@@ -75,6 +75,27 @@ export async function fetchMarketDataByTagId(tagId: string) {
 }
 
 /**
+ * Fetches the list of available events from Polymarket.
+ * @param limit The number of events to fetch.
+ * @link https://docs.polymarket.com/api-reference/
+ */
+export async function fetchTopEventData(limit: number = 10) {
+    const response = await axios.get(
+        'https://gamma-api.polymarket.com/events',
+        {
+            params: {
+                order: 'liquidityNum',
+                ascending: false,
+                closed: false,
+                limit,
+                volume_num_min: 100000
+            },
+        }
+    );
+    return response.data;
+}
+
+/**
  * Fetches the list of available markets from Polymarket.
  * @param limit The number of markets to fetch.
  * @link https://docs.polymarket.com/api-reference/

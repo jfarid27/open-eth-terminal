@@ -16,8 +16,10 @@ import {
 const predictionMarketsMenuOptions: MenuOption[] = [
     {
         name: "top",
-        command: "top [limit]",
-        description: "Fetch the top polymarket markets. If a limit is not provided, the top 10 markets by volume are returned.",
+        command: "top [limit] [term]",
+        description: `Fetch the top polymarket markets.
+        If a limit is not provided, the top 10 markets by volume are returned.
+        If a term is provided, filters the top markets for that term.`,
         action: polymarketMarketsTopFetchHandler,
     },
     {
