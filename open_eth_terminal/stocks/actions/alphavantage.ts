@@ -16,6 +16,13 @@ const tokenLens = lensPath(["loadedContext", "token", "symbol"]);
 const getLoadedToken = view(tokenLens);
 const timeSeriesDailyP = prop("Time Series (Daily)");
 
+
+/**
+ * Process the daily data from AlphaVantage by projecting the nested object into
+ * an array of objects with date, close, timestamp
+ * @param data raw object data from AlphaVantage 
+ * @returns object array with date, close, timestamp
+ */
 const processDailyData = pipe(
       timeSeriesDailyP,
       mapObjIndexed((value: Record<string, string>, key:string) => {
@@ -26,26 +33,8 @@ const processDailyData = pipe(
        } 
       }),
       values,
-      tap(console.log),
       sortBy(prop("timestamp"))
 );
-
-/**
- * Generate the ordered date range inclusive between startDate and endDate in the format YYYY-MM-DD
- * @param startDate 
- * @param endDate 
- * @returns Array of dates in the format YYYY-MM-DD 
- */
-function generateDateRange(startDate: string, endDate: string) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const dateRange = [];
-    while (start <= end) {
-        dateRange.push(start.toISOString().split("T")[0]);
-        start.setDate(start.getDate() + 1);
-    }
-    return dateRange;
-}
 
 export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
     const ALPHAVANTAGE_API_KEY = st.apiKeys.alphavantage;
@@ -71,7 +60,7 @@ export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolS
       const symbolObj = {
         name: loadedTokenSymbol,
         id: loadedTokenSymbol.toLowerCase(),
-        _type: ExchangeSymbolType.CoinGecko,
+        _type: ExchangeSymbolType.AlphaVantage,
       };
   
       const result = await stocks.chart.get(symbolObj, ALPHAVANTAGE_API_KEY);
