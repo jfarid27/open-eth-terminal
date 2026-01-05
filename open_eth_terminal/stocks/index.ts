@@ -1,7 +1,7 @@
 import { registerTerminalApplication } from "../utils/program_loader.ts";
 import { Menu, MenuOption, } from "../types.ts";
 import { menu_globals } from "../utils/menu_globals.ts";
-import { chartPriceHandler } from "./actions/alphavantage.ts";
+import { chartPriceHandler, spotPriceHandler } from "./actions/alphavantage.ts";
 
 const stocksMenuOptions: MenuOption[] = [
     {
@@ -9,6 +9,12 @@ const stocksMenuOptions: MenuOption[] = [
         command: "chart [symbol]",
         description: "Fetch chart data for the given symbol",
         action: chartPriceHandler,
+    },
+    {
+        name: "spot",
+        command: "spot [symbol]",
+        description: "Fetch spot prices for the given symbol",
+        action: spotPriceHandler,
     },
     ...menu_globals,
 ]
