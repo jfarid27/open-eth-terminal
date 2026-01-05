@@ -7,13 +7,18 @@ export enum EnvironmentType {
     Development = "development",
     Production = "production",
 }
+
+export enum APIKeyTypes {
+    CoinGecko = "coingecko",
+    Alphavantage = "alphavantage",
+}
     
 /**
  * Configuration for the API keys.
  */
 export interface APIKeyConfig {
-    coingecko?: string;
-    alphavantage?: string;
+    [APIKeyTypes.CoinGecko]: string;
+    [APIKeyTypes.Alphavantage]: string;
 }
 
 export interface TokenContext {
