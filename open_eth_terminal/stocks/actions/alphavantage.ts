@@ -5,14 +5,47 @@ import {
     TerminalUserStateConfig, EnvironmentType,
      CommandState, CommandResultType
 } from "./../../types.ts";
-import { lensPath, view } from "ramda";
+import { showChart } from "./../../components/charting.ts";
+import { lensPath, lensProp, pipe, view, values, tap,
+    prop, mapObjIndexed, sortBy } from "ramda";
 
 // Lens for the loaded token on the user state config.
 const tokenLens = lensPath(["loadedContext", "token", "symbol"]);
 
 // View the loaded token on the user state config.
 const getLoadedToken = view(tokenLens);
+const timeSeriesDailyP = prop("Time Series (Daily)");
 
+const processDailyData = pipe(
+      timeSeriesDailyP,
+      mapObjIndexed((value: Record<string, string>, key:string) => {
+       return {
+         date: key,
+         close: Number(value["4. close"]),
+         timestamp: new Date(key).getTime()
+       } 
+      }),
+      values,
+      tap(console.log),
+      sortBy(prop("timestamp"))
+);
+
+/**
+ * Generate the ordered date range inclusive between startDate and endDate in the format YYYY-MM-DD
+ * @param startDate 
+ * @param endDate 
+ * @returns Array of dates in the format YYYY-MM-DD 
+ */
+function generateDateRange(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const dateRange = [];
+    while (start <= end) {
+        dateRange.push(start.toISOString().split("T")[0]);
+        start.setDate(start.getDate() + 1);
+    }
+    return dateRange;
+}
 
 export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
     const ALPHAVANTAGE_API_KEY = st.apiKeys.alphavantage;
@@ -47,8 +80,8 @@ export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolS
         console.log(result);
       }
       
-      console.log(result)
-  
+      const sorted = processDailyData(result) as Record<string, string | number>[];
+      await showChart(sorted, "timestamp", "close", "Price Chart"); 
     } catch (error) {
         if (st.environment === EnvironmentType.Development) {
             console.log(error);
