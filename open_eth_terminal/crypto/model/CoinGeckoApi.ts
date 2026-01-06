@@ -2,7 +2,6 @@ import axios from "axios";
 import { lensPath, view, defaultTo, pipe } from "ramda";
 import { ExchangeSymbol } from "../../types.ts";
 
-const COINGECKO_API = "https://api.coingecko.com/api/v3/simple/price";
 
 export type fetchSpotCoingeckoResponse = {
     symbol: ExchangeSymbol;
@@ -25,7 +24,8 @@ const CoinGeckoLensPrice = (symbol: ExchangeSymbol) => lensPath([symbol.id, "usd
  * @returns The current price for the specified symbol.
  */
 export async function fetchSpotCoingecko(symbol: ExchangeSymbol, COINGECKO_API_KEY: string): Promise<fetchSpotCoingeckoResponse> {
-    const response = await axios.get(COINGECKO_API, {
+    const COINGECKO_SPOT_API = "https://api.coingecko.com/api/v3/simple/price";
+    const response = await axios.get(COINGECKO_SPOT_API, {
         params: {
             vs_currencies: "usd",
             ids: symbol.id,

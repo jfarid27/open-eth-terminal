@@ -1,5 +1,6 @@
 import { ExchangeSymbol, ExchangeSymbolType } from "../../types.ts";
 import { fetchSpotCoingecko } from "./CoinGeckoApi.ts";
+import { fetchChartAlphavantage } from "./AlphavantageApi.ts";
 
 /**
  * Fetches the current price for a specified symbol.
@@ -14,8 +15,16 @@ export async function spot(symbol: ExchangeSymbol, COINGECKO_API_KEY: string) {
     }
 }
 
-export async function chart(symbol: ExchangeSymbol, COINGECKO_API_KEY: string) {
-    return undefined;
+export async function chart(symbol: ExchangeSymbol, API_KEY: string) {
+    switch (symbol._type) {
+        case ExchangeSymbolType.CoinGecko:
+            return await fetchChartAlphavantage(symbol, API_KEY);
+        default:
+            throw new Error(`Unsupported symbol type: ${symbol._type}`);
+    }
 }
 
-export default { spot, chart };
+export default { 
+    coingecko: { spot }, 
+    alphavantage: { chart }
+};

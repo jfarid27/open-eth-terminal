@@ -1,7 +1,7 @@
 import { registerTerminalApplication } from "../utils/program_loader.ts";
 import { Menu, MenuOption, } from "../types.ts";
 import { menu_globals } from "../utils/menu_globals.ts";
-import { spotPriceHandler } from "./actions/spot.ts";
+import { spotPriceHandler, chartPriceHandler } from "./actions/spot.ts";
 
 const cryptoMenuOptions: MenuOption[] = [
     {
@@ -9,6 +9,12 @@ const cryptoMenuOptions: MenuOption[] = [
         command: "price [symbol]",
         description: "Fetch current price for the given symbol",
         action: spotPriceHandler,
+    },
+    {
+        name: "chart",
+        command: "chart [symbol]",
+        description: "Fetch chart data for the given symbol",
+        action: chartPriceHandler,
     },
     ...menu_globals,
 ]
