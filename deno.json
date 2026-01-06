@@ -1,5 +1,5 @@
 {
     "tasks": {
-        "start": "deno run --allow-net --allow-env --allow-read=.env,./tmp,./data,./scripts,./node_modules --allow-write=./tmp,./data index.ts"
+        "start": "deno run --allow-sys --allow-run --allow-net --allow-env --allow-read=.env,./tmp,./data,./scripts,./node_modules --allow-write=./tmp,./data index.ts"
     }
 }
