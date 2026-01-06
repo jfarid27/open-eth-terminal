@@ -1,4 +1,4 @@
-import { ExchangeSymbol } from "../../types.ts";
+import { StockSymbolType } from "../types.ts";
 import axios from "axios";
 
 /**
@@ -10,7 +10,7 @@ import axios from "axios";
  * @returns The chart data for the specified symbol.
  * @see https://www.alphavantage.co/documentation/
  */
-export async function fetchChartAlphaVantage(symbol: ExchangeSymbol, ALPHAVANTAGE_API_KEY: string) {
+export async function fetchChartAlphaVantage(symbol: StockSymbolType, ALPHAVANTAGE_API_KEY: string) {
     
     const fullfillTimeout = new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -39,7 +39,7 @@ export async function fetchChartAlphaVantage(symbol: ExchangeSymbol, ALPHAVANTAG
  * @returns The spot price for the specified symbol.
  * @see https://www.alphavantage.co/documentation/
  */
-export async function fetchSpotPriceAlphaVantage(symbol: ExchangeSymbol, ALPHAVANTAGE_API_KEY: string) {
+export async function fetchSpotPriceAlphaVantage(symbol: StockSymbolType, ALPHAVANTAGE_API_KEY: string) {
     
     const response = await axios.get("https://www.alphavantage.co/query", {
         params: {

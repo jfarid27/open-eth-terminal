@@ -8,21 +8,43 @@ export enum EnvironmentType {
     Production = "production",
 }
 
-export enum APIKeyTypes {
+/**
+ * List of available API key types.
+ */
+export enum APIKeyType {
     CoinGecko = "coingecko",
     Alphavantage = "alphavantage",
+    BlockchainCom = "blockchaincom",
+}
+
+/**
+ * List of available data sources.
+ */
+export enum DataSourceType {
+    CoinGecko = 'coingecko',
+    AlphaVantage = 'alphavantage',
+    BlockchainCom = 'blockchaincom',
+}
+   
+/**
+ * Mapping of data source types to API key types.
+ */
+export interface DatasourceKeyMapping {
+    [DataSourceType.CoinGecko]: APIKeyType.CoinGecko;
+    [DataSourceType.AlphaVantage]: APIKeyType.Alphavantage;
+    [DataSourceType.BlockchainCom]: APIKeyType.BlockchainCom;
 }
     
 /**
  * Configuration for the API keys.
  */
-export interface APIKeyConfig {
-    [APIKeyTypes.CoinGecko]?: string;
-    [APIKeyTypes.Alphavantage]?: string;
+export type APIKeyConfig = {
+    [key in APIKeyType]: string | undefined;
 }
 
-export interface TokenContext {
-    symbol: string;
+export interface CryptoContext {
+    symbol?: string;
+    datasource?: DataSourceType;
 }
 
 export enum PredictionMarketsType {
@@ -42,7 +64,7 @@ export interface PredictionMarketsContext {
 }
 
 export interface LoadedContext {
-    token?: TokenContext;
+    crypto?: CryptoContext;
     predictionMarkets?: PredictionMarketsContext;
 }
 
@@ -112,51 +134,3 @@ export interface CommandState {
     result: CommandResult;
     state: TerminalUserStateConfig;
 }
-
-export enum ExchangeSymbolType {
-    CoinGecko = 'coingecko',
-    AlphaVantage = 'alphavantage',
-}
-
-export interface ExchangeSymbol {
-    name: string;
-    id: string;
-    _type: ExchangeSymbolType;
-}
-
-/**
- * Generates an exchange symbol from the specified name, ID, and type. Useful for creating new exchange symbols.
- *
- * @param name Name of the symbol.
- * @param id ID of the symbol.
- * @param type Type of the symbol.
- */
-export function generateExchangeSymbol(name: string, id: string, type: ExchangeSymbolType): ExchangeSymbol {
-    switch (type) {
-        case ExchangeSymbolType.CoinGecko:
-            return {
-                name,
-                id,
-                _type: ExchangeSymbolType.CoinGecko,
-            };
-        case ExchangeSymbolType.AlphaVantage:
-            return {
-                name,
-                id,
-                _type: ExchangeSymbolType.AlphaVantage,
-            }
-    }
-}
-
-/**
- * Available default exchange symbols from CoinGecko.
- */
-const CoinGeckoSymbols: ExchangeSymbol[] = [
-    generateExchangeSymbol("Bitcoin", "bitcoin", ExchangeSymbolType.CoinGecko),
-    generateExchangeSymbol("Ethereum", "ethereum", ExchangeSymbolType.CoinGecko),
-]
-
-/**
- * Union of all available exchange symbols.
- */
-export const ExchangeSymbols: ExchangeSymbol[] = [...CoinGeckoSymbols];

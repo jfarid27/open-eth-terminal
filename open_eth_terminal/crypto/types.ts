@@ -1,6 +1,6 @@
 import { DataSourceType } from "../types.ts";
 
-export interface StockSymbolType {
+export interface CryptoSymbolType {
     name: string;
     id: string;
     _type: DataSourceType;

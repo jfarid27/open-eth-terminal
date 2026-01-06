@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import stocks from "./../model/index.ts";
-import { ExchangeSymbolType } from "./../../types.ts";
+import { DataSourceType } from "./../../types.ts";
 import {
     TerminalUserStateConfig, EnvironmentType,
      CommandState, CommandResultType
@@ -63,7 +63,7 @@ export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolS
       const symbolObj = {
         name: loadedTokenSymbol,
         id: loadedTokenSymbol.toLowerCase(),
-        _type: ExchangeSymbolType.AlphaVantage,
+        _type: DataSourceType.AlphaVantage,
       };
   
       const result = await stocks.chart.get(symbolObj, ALPHAVANTAGE_API_KEY);
@@ -115,7 +115,7 @@ export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolSt
       const symbolObj = {
         name: loadedTokenSymbol,
         id: loadedTokenSymbol.toLowerCase(),
-        _type: ExchangeSymbolType.AlphaVantage,
+        _type: DataSourceType.AlphaVantage,
       };
   
       const result: Record<string, string> = await stocks.spot.get(symbolObj, ALPHAVANTAGE_API_KEY);
