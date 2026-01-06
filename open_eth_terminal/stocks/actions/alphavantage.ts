@@ -3,8 +3,9 @@ import stocks from "./../model/index.ts";
 import { DataSourceType } from "./../../types.ts";
 import {
     TerminalUserStateConfig, EnvironmentType,
-     CommandState, CommandResultType
+     CommandState, CommandResultType, LogLevel
 } from "./../../types.ts";
+import { inspectLogger } from "./../../utils/logging.ts";
 import { showLineChart } from "./../../components/charting.ts";
 import { lensPath, lensProp, pipe, view, values, tap,
     prop, mapObjIndexed, sortBy, props, 
@@ -40,6 +41,7 @@ const processDailyData = pipe(
 );
 
 export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
+    const applicationLogging = inspectLogger(st);
     const ALPHAVANTAGE_API_KEY = st.apiKeys.alphavantage;
     if (!ALPHAVANTAGE_API_KEY) {
         console.log(chalk.red("No AlphaVantage API key found"));
@@ -59,32 +61,19 @@ export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolS
         };
     }
 
-    try {
-      const symbolObj = {
+    const symbolObj = {
         name: loadedTokenSymbol,
         id: loadedTokenSymbol.toLowerCase(),
         _type: DataSourceType.AlphaVantage,
-      };
-  
-      const result = await stocks.chart.get(symbolObj, ALPHAVANTAGE_API_KEY);
-  
-      if (st.logLevel) {
-        console.log(result);
-      }
-      
-      const sorted = processDailyData(result) as Record<string, string | number>[];
-      await showLineChart(sorted, "timestamp", "close", "Price Chart"); 
-    } catch (error) {
-        if (st.environment === EnvironmentType.Development) {
-            console.log(error);
-        }
-        console.log(chalk.red("Network Error"));
-        return {
-            result: { type: CommandResultType.Error },
-            state: st,
-        };
-    }
+    };
+
+    const result = await stocks.chart.get(symbolObj, ALPHAVANTAGE_API_KEY);
     
+    applicationLogging(LogLevel.Debug)(result);
+
+    const sorted = processDailyData(result) as Record<string, string | number>[];
+    await showLineChart(sorted, "timestamp", "close", "Price Chart"); 
+
     return {
         result: { type: CommandResultType.Success },
         state: st,
@@ -92,6 +81,8 @@ export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolS
 }
 
 export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
+
+    const applicationLogging = inspectLogger(st);
     const ALPHAVANTAGE_API_KEY = st.apiKeys.alphavantage;
     if (!ALPHAVANTAGE_API_KEY) {
         console.log(chalk.red("No AlphaVantage API key found"));
@@ -146,14 +137,9 @@ export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolSt
           fit: true
       });
       
-      if (st.logLevel) {
-        console.log(result);
-      }
-      
     } catch (error) {
-        if (st.environment === EnvironmentType.Development) {
-            console.log(error);
-        }
+        applicationLogging(LogLevel.Error)(error);
+
         console.log(chalk.red("Network Error"));
         return {
             result: { type: CommandResultType.Error },

@@ -1,16 +1,16 @@
 import { registerTerminalApplication } from "../utils/program_loader.ts";
-import { Menu, MenuOption, } from "../types.ts";
-import { menu_globals } from "../utils/menu_globals.ts";
+import { Menu, MenuOption, TerminalUserStateConfig } from "../types.ts";
+import { menuGlobals } from "../utils/menu_globals.ts";
 import { redditTopHandler } from "./actions/reddit.ts";
 
-const newsMenuOptions: MenuOption[] = [
+const newsMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
     {
         name: "reddit",
         command: "reddit [subreddit] [limit]",
         description: "Fetch top posts from the given subreddit",
         action: redditTopHandler,
     },
-    ...menu_globals,
+    ...menuGlobals(state),
 ]
 
 const newsMenu: Menu = {

@@ -68,6 +68,10 @@ export interface LoadedContext {
     predictionMarkets?: PredictionMarketsContext;
 }
 
+/**
+ * Context for the currently running script allowing for tracking the current
+ * command and tail commands.
+ */
 export interface ScriptContext {
     filename?: string;
     currentCommand?: string;
@@ -75,11 +79,31 @@ export interface ScriptContext {
 }
 
 /**
+ * Log levels allowing for developers to order log messages. It is intended that
+ * these do not affect general output messages to the user.
+ * 
+ * The log levels are ordered from highest to lowest priority.
+ * Levels:
+ *  - Debug: 4 (Most verbose. Intended to show information about inputs and outputs as well as verbose data.)
+ *  - Info: 3 (General extra information. Intended for showing input and output details.)
+ *  - Warning: 2 (Non-critical warnings. Intended for showing possible issues.)
+ *  - Error: 1 (Critical error details. Intended for showing extra information about errors.)
+ *  - None: 0 (No extra information is shown. Intended for production.)
+ */
+export enum LogLevel {
+    Debug = 4,
+    Info = 3,
+    Warning = 2,
+    Error = 1,
+    None = 0,
+}
+
+/**
  * Configuration for the terminal user state.
  */
 export interface TerminalUserStateConfig {
     environment: EnvironmentType;
-    logLevel: string | undefined;
+    logLevel: LogLevel;
     apiKeys: APIKeyConfig;
     loadedContext: LoadedContext;
     actionTimeout?: number;
@@ -107,7 +131,7 @@ export interface Menu {
     name: string;
     description: string;
     messagePrompt: string;
-    options: MenuOption[];
+    options: (st: TerminalUserStateConfig) => MenuOption[];
 }
 
 export enum CommandResultType {
