@@ -1,6 +1,6 @@
-import { Menu, MenuOption, TerminalUserStateConfig } from "../types.ts";
-import { registerTerminalApplication } from "../utils/program_loader.ts";
-import { menuGlobals } from "../utils/menu_globals.ts";
+import { Menu, MenuOption, TerminalUserStateConfig } from "./../../types.ts";
+import { registerTerminalApplication } from "./../../utils/program_loader.ts";
+import { menuGlobals } from "./../../utils/menu_globals.ts";
 import {
     polymarketMarketsTopFetchHandler,
     polymarketMarketsTagsFetchHandler,
@@ -13,7 +13,7 @@ import {
 /**
  *  Prediction Markets Menu Options.
  */
-const predictionMarketsMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
+const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
     {
         name: "top",
         command: "top [limit] [term]",
@@ -59,14 +59,14 @@ const predictionMarketsMenuOptions = (state: TerminalUserStateConfig): MenuOptio
 /**
  *  Prediction Markets Menu Definitions.
  */
-const predictionMarketsMenu: Menu = {
-    name: "Prediction Markets Menu",
-    description: "Prediction Markets Menu",
+const polymarketMenu: Menu = {
+    name: "Polymarket Menu",
+    description: "Polymarket Menu",
     messagePrompt: "Select an option:",
-    options: predictionMarketsMenuOptions,
+    options: polymarketMenuOptions,
 }
 
 
-export const predictionMarketsTerminal = registerTerminalApplication(predictionMarketsMenu);
+export const polymarketTerminal = registerTerminalApplication(polymarketMenu);
 
-export default predictionMarketsTerminal;
+export default polymarketTerminal;
