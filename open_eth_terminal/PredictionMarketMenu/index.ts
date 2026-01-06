@@ -1,6 +1,6 @@
-import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "../types.ts";
-import { registerTerminalApplication } from "../utils/program_loader.ts";
-import { menuGlobals } from "../utils/menu_globals.ts";
+import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "./../types.ts";
+import { registerTerminalApplication } from "./../utils/program_loader.ts";
+import { menuGlobals } from "./../utils/menu_globals.ts";
 import polymarketTerminal from "./PolymarketMenu/index.ts";
 
 /**
