@@ -12,9 +12,9 @@ import { project, pipe, set, filter, toLower, lensProp, map,
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import PredictionMarketsData from "./../model/index.ts";
-import {CommandResultType, CommandState, PredictionMarketsType } from "./../../types.ts";
-import { TerminalUserStateConfig } from "./../../types.ts";
-import { ActionHandler } from "./../../types.ts";
+import {CommandResultType, CommandState, PredictionMarketsType } from "./../../../types.ts";
+import { TerminalUserStateConfig } from "./../../../types.ts";
+import { ActionHandler } from "./../../../types.ts";
 import chalk from "chalk";
 
 /**
