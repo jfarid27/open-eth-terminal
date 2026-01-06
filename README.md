@@ -10,7 +10,11 @@ It is highly recommended to use Deno for this application. Node.js is supported 
 
 ### Deno
 
-1.  Clone the repository.
+1.  Clone the repository. You can clone a specific version by using the `--branch` flag with a version tag name.
+    Check the [releases](https://github.com/jfarid27/open-eth-terminal/releases) page for available version tags.
+    ```bash
+    git clone --depth 1 --branch <version_tag_name> https://github.com/jfarid27/open-eth-terminal.git
+    ```
 2.  Install dependencies:
     ```bash
     deno install -A --unstable --name=deno index.ts
@@ -18,7 +22,11 @@ It is highly recommended to use Deno for this application. Node.js is supported 
 
 ### Node.js
 
-1.  Clone the repository.
+1.  Clone the repository. You can clone a specific version by using the `--branch` flag with a version tag name.
+    Check the [releases](https://github.com/jfarid27/open-eth-terminal/releases) page for available version tags.
+    ```bash
+    git clone --depth 1 --branch <version_tag_name> https://github.com/jfarid27/open-eth-terminal.git
+    ```
 2.  Install dependencies:
     ```bash
     npm install
