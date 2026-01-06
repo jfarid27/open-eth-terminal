@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { lensPath, set, view } from "ramda";
 import cryptoTerminal from "./crypto/index.ts";
 import predictionMarketsTerminal from "./prediction_markets/index.ts";
 import stocksTerminal from "./stocks/index.ts";
@@ -90,6 +91,38 @@ const menuOptions: MenuOption[] = [
                     state: st,
                 };
             }
+        },
+    },
+    {
+        name: "keys",
+        command: "keys [type] [value]",
+        description: "Set or get the API keys",
+        action: (st: TerminalUserStateConfig) => async (keyType: string, value?: string ) => { 
+            
+            if (!keyType) {
+                const availableKeys = Object.keys(st.apiKeys);
+                console.log(chalk.green(`Available API keys: ${availableKeys.join(", ")}`));
+                return {
+                    result: { type: CommandResultType.Success },
+                    state: st,
+                };
+            }
+            
+            const keyLens = lensPath(['apiKeys', keyType]);
+            if (keyType && !value) {
+                const apiKey = view(keyLens, st);
+                console.log(chalk.green(`API Key for ${keyType} is ${apiKey}`));
+                return {
+                    result: { type: CommandResultType.Success },
+                    state: st,
+                };
+            }
+            const newState = set(keyLens, value, st);
+            console.log(chalk.green(`API Key for ${keyType} set to ${value}`));
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
         },
     },
     ...menu_top

@@ -42,8 +42,9 @@ export type APIKeyConfig = {
     [key in APIKeyType]: string | undefined;
 }
 
-export interface TokenContext {
-    symbol: string;
+export interface CryptoContext {
+    symbol?: string;
+    datasource?: DataSourceType;
 }
 
 export enum PredictionMarketsType {
@@ -63,7 +64,7 @@ export interface PredictionMarketsContext {
 }
 
 export interface LoadedContext {
-    token?: TokenContext;
+    crypto?: CryptoContext;
     predictionMarkets?: PredictionMarketsContext;
 }
 
