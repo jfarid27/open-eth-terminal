@@ -1,52 +1,60 @@
 import * as Plot from "@observablehq/plot";
-import { JSDOM } from "jsdom";
-import open from "open";
-import { writeFile } from "node:fs/promises";
-import { join } from "node:path";
-import { map, lensProp, set } from "ramda";
+import { JSDOM } from "npm:jsdom";
+import open from "npm:open";
 
-const HTML_BLOCK = (title: string, html: string) => {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <style>
-        body { 
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            background: #fdfdfd;
-        }
-        svg {
-            max-width: 90vw;
-            max-height: 90vh;
-            height: auto;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            border-radius: 0.5rem;
-            background: white;
-            padding: 2rem;
-        }
-    </style>
-</head>
-<body>
-    ${html}
-</body>
-</html>`;
+/**
+ * A reusable function to display an Observable Plot or SVG string
+ * in the system's default viewer.
+ */
+export async function show(content: Element | string) {
+  let svgString = "";
+  if (typeof content === "string") {
+    svgString = content;
+  } else {
+    let element = content;
 
+    // If the element is a wrapper (e.g. figure), extract the svg
+    if (element.tagName.toLowerCase() !== "svg") {
+        const nested = element.querySelector("svg");
+        if (nested) element = nested;
+    }
 
+    if (!element.getAttribute("xmlns")) {
+      element.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns", "http://www.w3.org/2000/svg");
+    }
+    if (!element.getAttribute("xmlns:xlink")) {
+      element.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+    }
+    svgString = element.outerHTML;
+  }
+
+  try {
+      const tempFile = await Deno.makeTempFile({ dir: "./tmp", suffix: ".svg" });
+      
+      await Deno.writeTextFile(tempFile, svgString);
+      console.log(`Saved chart to: ${tempFile}`);
+      await open(tempFile, { wait: false });
+  } catch (err) {
+      console.error(err);
+  }
 }
 
 export function lineChart(data: any[], x: string, y: string) {
-    return Plot.line(data, {x, y});
+    return Plot.line(data, {
+        x: (d) => new Date(d[x]),
+        y: (d) => Number(d[y]),
+        stroke: "dodgerblue"
+    });
 }
 
-export async function showChart(data: Record<string, any>[], x: string, y: string, title: string = "Chart") {
+/**
+ * Display a basic single line chart from the given data.
+ * @param data The data to be displayed.
+ * @param x The x axis label.
+ * @param y The y axis label.
+ * @param title The title of the chart.
+ */
+export async function showLineChart(data: Record<string, any>[], x: string, y: string, title: string = "Chart") {
     // specific setup for jsdom to match what Plot expects
     const jsdom = new JSDOM("");
     const document = jsdom.window.document;
@@ -55,22 +63,36 @@ export async function showChart(data: Record<string, any>[], x: string, y: strin
     const plot = Plot.plot({
         document: document,
         title,
+        style: {
+            background: "black",
+            color: "white",
+        },
         grid: true,
-        x: { label: x, transform: (value: string) => new Date(value).toISOString().split("T")[0] },
-        y: { label: y, transform: (value) => Number(value) },
+        x: { label: x, ticks: 5 },
+        y: { label: y },
         marks: [
             lineChart(data, x, y)
         ]
     });
-    
-    const html = HTML_BLOCK(title, plot.outerHTML);
 
-    // Save to local tmp folder
-    const projectRoot = process.cwd(); 
-    const tmpDir = join(projectRoot, "tmp");
-    const filePath = join(tmpDir, `chart-${Date.now()}.html`);
+    // Ensure the SVG element itself has the background style, 
+    // so it persists when 'show' extracts it from the figure wrapper.
+    const svg = plot.tagName.toLowerCase() === "svg" ? plot : plot.querySelector("svg");
+    if (svg) {
+        svg.setAttribute("style", "background-color: black; color: white;");
+        
+        // Explicitly format the background with a rect, as some viewers ignore the style attribute
+        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        bg.setAttribute("width", "100%");
+        bg.setAttribute("height", "100%");
+        bg.setAttribute("fill", "black");
+        
+        if (svg.firstChild) {
+            svg.insertBefore(bg, svg.firstChild);
+        } else {
+            svg.appendChild(bg);
+        }
+    }
     
-    await writeFile(filePath, html);
-    console.log(`Saved output to ${filePath}.`);
-    await open(filePath);
+    await show(plot);
 }
