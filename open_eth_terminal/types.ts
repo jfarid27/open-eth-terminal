@@ -11,6 +11,7 @@ export enum EnvironmentType {
 export enum APIKeyTypes {
     CoinGecko = "coingecko",
     Alphavantage = "alphavantage",
+    Fred = "fred",
 }
     
 /**
@@ -19,6 +20,7 @@ export enum APIKeyTypes {
 export interface APIKeyConfig {
     [APIKeyTypes.CoinGecko]?: string;
     [APIKeyTypes.Alphavantage]?: string;
+    [APIKeyTypes.Fred]?: string;
 }
 
 export interface TokenContext {
