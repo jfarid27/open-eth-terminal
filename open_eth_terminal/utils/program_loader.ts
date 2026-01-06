@@ -2,11 +2,19 @@ import chalk from "chalk";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import { Command } from "commander";
-import inquirer from "inquirer";
-import { CommandState, CommandResultType, Menu, MenuOption, TerminalUserStateConfig } from "../types.ts";
+import { input as inquirer } from '@inquirer/prompts';
+import {
+    CommandState, CommandResultType, Menu, MenuOption,
+    TerminalUserStateConfig, LogLevel
+} from "../types.ts";
+import { inspectLogger } from './logging.ts';
 
 /**
  * Wrap a commander program into a resolvable promise from a menu option.
+ *
+ * The reason this exists is because commander actions return promises of void,
+ * but we need to resolve the command state of a completed action and pass it to
+ * the next call.
  * 
  * @param program The commander program to wrap.
  * @param menuOption The menu option to wrap.
@@ -22,8 +30,8 @@ export function loadProgram(program: Command, menuOption: MenuOption, state: Ter
             .action((...args: any[]) => {
 
                 menuOption.action(state)(...args)
-                .then(resolve)
-                .catch(reject);
+                    .then(resolve)
+                    .catch(reject);
 
                 // Set the timeout only if the action callback is set
                 if (ops?.timeout || state?.actionTimeout) {
@@ -35,7 +43,7 @@ export function loadProgram(program: Command, menuOption: MenuOption, state: Ter
                         });
                     }, ops?.timeout || state?.actionTimeout);
                 }
-            })
+            });
             
     });
 }
@@ -50,10 +58,13 @@ export function loadProgram(program: Command, menuOption: MenuOption, state: Ter
 export const registerTerminalApplication = (menu: Menu) => {
     
     async function terminalApplication(st: TerminalUserStateConfig): Promise<TerminalUserStateConfig> {
+        
+        const applicationLogging = inspectLogger(st);
+        const menu_options = menu.options(st);
         // Only show menu if not in script mode
         if (!st.scriptContext?.currentCommand) {
             console.log(chalk.blue(menu.name));
-            const tableDescriptions = menu.options.map((option) => [option.name, option.command, option.description]);
+            const tableDescriptions = menu_options.map((option) => [option.name, option.command, option.description]);
 
             terminal.table([
                 ['Name', 'Command', 'Description'],
@@ -69,7 +80,6 @@ export const registerTerminalApplication = (menu: Menu) => {
                 fit: true
             });
         }
-        console.log(chalk.blue(menu.name));
         
         try {
             let input = "";
@@ -80,14 +90,10 @@ export const registerTerminalApplication = (menu: Menu) => {
                 console.log(chalk.yellow(`Executing script command: ${input}`));
                 isScriptExecution = true;
             } else {
-                const { command } = await inquirer.prompt([
-                {
-                    type: "input",
-                    name: "command",
+                const answer = await inquirer({
                     message: menu.name + " >",
-                },
-                ]);
-                input = command?.trim();
+                });
+                input = answer?.trim();
             }
 
             if (!input) return terminalApplication(st);
@@ -98,11 +104,10 @@ export const registerTerminalApplication = (menu: Menu) => {
               writeErr: (str) => process.stdout.write(chalk.red(str)),
             });
 
-            const resultPs = menu.options.map((option) => {
-                // If we are executing a script, advance the command pointer
+            const resultPs: Promise<CommandState>[] = menu_options.map((option) => {
                 if (isScriptExecution) {
                     const [nextCommand, ...rest] = st.scriptContext.tailCommands || [];
-                    const nextScriptState = {
+                    const nextScriptState: TerminalUserStateConfig = {
                         ...st,
                         scriptContext: {
                             ...st.scriptContext,
@@ -110,9 +115,9 @@ export const registerTerminalApplication = (menu: Menu) => {
                             tailCommands: rest
                         }
                     };
-                    return loadProgram(program, option, nextScriptState);
+                    return loadProgram(program, option, nextScriptState)    
                 }
-                return loadProgram(program, option, st);
+                return loadProgram(program, option, st)
             });
 
             const args = input.split(/\s+/);
@@ -141,19 +146,11 @@ export const registerTerminalApplication = (menu: Menu) => {
                 console.log(chalk.red("Command failed"));
             }
             
-            // If in script execution, maybe we should stop or continue?
-            // Usually scripts stop on error, but the prompt didn't specify.
-            // We'll log and continue (which recurses).
-            // But if we recurse with 'st', we might infinite loop on the same failing command if we don't advance!
-            
-            if (st.logLevel) {
-                console.log(err);
-            }
+            applicationLogging(LogLevel.Error)(err);
             console.log(chalk.red("Not a valid command"));
             
             // Fix for script loop on error:
-            // If error occurred during script execution, we must advance or abort.
-            // Let's abort script to prevent infinite error loops.
+            // If error occurred during script execution, abort.
             if (st.scriptContext?.currentCommand) {
                 console.log(chalk.red("Script execution aborted due to error."));
                 const abortState = {

@@ -23,6 +23,7 @@
     "start": "npx tsx index.ts"
   },
   "dependencies": {
+    "@inquirer/prompts": "^8.1.0",
     "@observablehq/plot": "^0.6.17",
     "@types/terminal-kit": "^2.5.7",
     "axios": "^1.13.2",
@@ -31,7 +32,6 @@
     "d3": "^7.9.0",
     "dotenv": "^17.2.3",
     "figlet": "^1.9.4",
-    "inquirer": "^13.1.0",
     "jsdom": "^27.0.1",
     "open": "^11.0.0",
     "ramda": "^0.32.0",
