@@ -3,7 +3,7 @@ import { lensPath, set, view } from "ramda";
 import cryptoTerminal from "./crypto/index.ts";
 import predictionMarketsTerminal from "./prediction_markets/index.ts";
 import stocksTerminal from "./stocks/index.ts";
-import { menu_top } from "./utils/menu_globals.ts";
+import { menuGlobalsTop } from "./utils/menu_globals.ts";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import newsTerminal from "./news/index.ts";
@@ -11,10 +11,10 @@ import newsTerminal from "./news/index.ts";
 import figlet from "figlet";
 
 import { ENVIRONMENT, LOG_LEVEL, COINGECKO_API_KEY, ALPHAVANTAGE_API_KEY, BLOCKCHAINCOM_API_KEY } from "./config.ts";
-import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "./types.ts";
+import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType, LogLevel, EnvironmentType } from "./types.ts";
 import { registerTerminalApplication } from "./utils/program_loader.ts";
 
-const menuOptions: MenuOption[] = [
+const menuOptions = (state: TerminalUserStateConfig): MenuOption[] => ([
     {
         name: "crypto",
         command: "crypto",
@@ -125,8 +125,8 @@ const menuOptions: MenuOption[] = [
             };
         },
     },
-    ...menu_top
-];
+    ...menuGlobalsTop(state),
+]);
 
 const mainMenu: Menu = {
     name: "Main Menu",
@@ -141,9 +141,28 @@ export async function startMain() {
   // Only show banner on initial load
   console.log(chalk.green(figlet.textSync("Open Eth Terminal", { horizontalLayout: 'full' })));
   
+  const logLevelMap: { [key: string]: LogLevel } = {
+    "debug": LogLevel.Debug,
+    "info": LogLevel.Info,
+    "warning": LogLevel.Warning,
+    "error": LogLevel.Error,
+  };
+
+  const environmentMap: { [key: string]: EnvironmentType } = {
+    "development": EnvironmentType.Development,
+    "production": EnvironmentType.Production,
+  };
+  
+  
+  const logLevel = (LOG_LEVEL && LOG_LEVEL in logLevelMap) ?
+    logLevelMap[LOG_LEVEL] : 0;
+  
+  const environment = (ENVIRONMENT && ENVIRONMENT in environmentMap) ?
+    environmentMap[ENVIRONMENT] : EnvironmentType.Production;
+  
   const state: TerminalUserStateConfig = {
-    environment: ENVIRONMENT,
-    logLevel: LOG_LEVEL,
+    environment: environment,
+    logLevel: logLevel,
     apiKeys: {
         coingecko: COINGECKO_API_KEY,
         alphavantage: ALPHAVANTAGE_API_KEY,

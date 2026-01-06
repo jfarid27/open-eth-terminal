@@ -1,11 +1,11 @@
 import { registerTerminalApplication } from "../utils/program_loader.ts";
 import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType, DataSourceType } from "../types.ts";
-import { menu_globals } from "../utils/menu_globals.ts";
+import { menuGlobals } from "../utils/menu_globals.ts";
 import { spotPriceHandler } from "./actions/spot.ts";
 import chalk from "chalk";
 import { lensPath, set, includes} from "ramda";
 
-const cryptoMenuOptions: MenuOption[] = [
+const cryptoMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
     {
         name: "price",
         command: "price [symbol]",
@@ -68,7 +68,7 @@ const cryptoMenuOptions: MenuOption[] = [
             };
         },
     },
-    ...menu_globals,
+    ...menuGlobals(state),
 ]
 
 const cryptoMenu: Menu = {
