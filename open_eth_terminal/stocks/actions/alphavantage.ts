@@ -5,7 +5,7 @@ import {
     TerminalUserStateConfig, EnvironmentType,
      CommandState, CommandResultType
 } from "./../../types.ts";
-import { showChart } from "./../../components/charting.ts";
+import { showLineChart } from "./../../components/charting.ts";
 import { lensPath, lensProp, pipe, view, values, tap,
     prop, mapObjIndexed, sortBy, props, 
     project} from "ramda";
@@ -73,7 +73,7 @@ export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolS
       }
       
       const sorted = processDailyData(result) as Record<string, string | number>[];
-      await showChart(sorted, "timestamp", "close", "Price Chart"); 
+      await showLineChart(sorted, "timestamp", "close", "Price Chart"); 
     } catch (error) {
         if (st.environment === EnvironmentType.Development) {
             console.log(error);

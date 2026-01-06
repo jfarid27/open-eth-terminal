@@ -1,7 +1,5 @@
 import * as Plot from "@observablehq/plot";
 import { JSDOM } from "npm:jsdom";
-import { map, lensProp, set } from "ramda";
-import * as d3 from "npm:d3";
 import open from "npm:open";
 
 /**
@@ -49,7 +47,14 @@ export function lineChart(data: any[], x: string, y: string) {
     });
 }
 
-export async function showChart(data: Record<string, any>[], x: string, y: string, title: string = "Chart") {
+/**
+ * Display a basic single line chart from the given data.
+ * @param data The data to be displayed.
+ * @param x The x axis label.
+ * @param y The y axis label.
+ * @param title The title of the chart.
+ */
+export async function showLineChart(data: Record<string, any>[], x: string, y: string, title: string = "Chart") {
     // specific setup for jsdom to match what Plot expects
     const jsdom = new JSDOM("");
     const document = jsdom.window.document;
@@ -69,6 +74,25 @@ export async function showChart(data: Record<string, any>[], x: string, y: strin
             lineChart(data, x, y)
         ]
     });
+
+    // Ensure the SVG element itself has the background style, 
+    // so it persists when 'show' extracts it from the figure wrapper.
+    const svg = plot.tagName.toLowerCase() === "svg" ? plot : plot.querySelector("svg");
+    if (svg) {
+        svg.setAttribute("style", "background-color: black; color: white;");
+        
+        // Explicitly format the background with a rect, as some viewers ignore the style attribute
+        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        bg.setAttribute("width", "100%");
+        bg.setAttribute("height", "100%");
+        bg.setAttribute("fill", "black");
+        
+        if (svg.firstChild) {
+            svg.insertBefore(bg, svg.firstChild);
+        } else {
+            svg.appendChild(bg);
+        }
+    }
     
     await show(plot);
 }
