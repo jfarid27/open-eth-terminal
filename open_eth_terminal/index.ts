@@ -1,12 +1,12 @@
 import chalk from "chalk";
 import { lensPath, set, view } from "ramda";
-import cryptoTerminal from "./crypto/index.ts";
-import predictionMarketsTerminal from "./prediction_markets/index.ts";
-import stocksTerminal from "./stocks/index.ts";
+import cryptoTerminal from "./CryptoMenu/index.ts";
+import predictionMarketsTerminal from "./PredictionMarketMenu/index.ts";
+import stocksTerminal from "./StocksMenu/index.ts";
 import { menuGlobalsTop } from "./utils/menu_globals.ts";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import newsTerminal from "./news/index.ts";
+import newsTerminal from "./NewsMenu/index.ts";
 
 import figlet from "figlet";
 
