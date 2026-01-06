@@ -1,4 +1,5 @@
 import chalk from "chalk";
+import { lensPath, set, view } from "ramda";
 import cryptoTerminal from "./crypto/index.ts";
 import predictionMarketsTerminal from "./prediction_markets/index.ts";
 import stocksTerminal from "./stocks/index.ts";
@@ -9,7 +10,7 @@ import newsTerminal from "./news/index.ts";
 
 import figlet from "figlet";
 
-import { ENVIRONMENT, LOG_LEVEL, COINGECKO_API_KEY, ALPHAVANTAGE_API_KEY } from "./config.ts";
+import { ENVIRONMENT, LOG_LEVEL, COINGECKO_API_KEY, ALPHAVANTAGE_API_KEY, BLOCKCHAINCOM_API_KEY } from "./config.ts";
 import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "./types.ts";
 import { registerTerminalApplication } from "./utils/program_loader.ts";
 
@@ -92,6 +93,38 @@ const menuOptions: MenuOption[] = [
             }
         },
     },
+    {
+        name: "keys",
+        command: "keys [type] [value]",
+        description: "Set or get the API keys",
+        action: (st: TerminalUserStateConfig) => async (keyType: string, value?: string ) => { 
+            
+            if (!keyType) {
+                const availableKeys = Object.keys(st.apiKeys);
+                console.log(chalk.green(`Available API keys: ${availableKeys.join(", ")}`));
+                return {
+                    result: { type: CommandResultType.Success },
+                    state: st,
+                };
+            }
+            
+            const keyLens = lensPath(['apiKeys', keyType]);
+            if (keyType && !value) {
+                const apiKey = view(keyLens, st);
+                console.log(chalk.green(`API Key for ${keyType} is ${apiKey}`));
+                return {
+                    result: { type: CommandResultType.Success },
+                    state: st,
+                };
+            }
+            const newState = set(keyLens, value, st);
+            console.log(chalk.green(`API Key for ${keyType} set to ${value}`));
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
+    },
     ...menu_top
 ];
 
@@ -114,6 +147,7 @@ export async function startMain() {
     apiKeys: {
         coingecko: COINGECKO_API_KEY,
         alphavantage: ALPHAVANTAGE_API_KEY,
+        blockchaincom: BLOCKCHAINCOM_API_KEY,
     },
     loadedContext: {},
     scriptContext: {}

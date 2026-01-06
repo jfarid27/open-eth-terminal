@@ -1,9 +1,8 @@
 import chalk from "chalk";
 import { spot } from "../model/index.ts";
-import { ExchangeSymbolType } from "../../types.ts";
 import {
     TerminalUserStateConfig, EnvironmentType,
-     CommandState, CommandResultType
+     CommandState, CommandResultType, DataSourceType
 } from "../../types.ts";
 import { lensPath, view } from "ramda";
 
@@ -37,7 +36,7 @@ export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolSt
       const symbolObj = {
         name: loadedTokenSymbol,
         id: loadedTokenSymbol.toLowerCase(),
-        _type: ExchangeSymbolType.CoinGecko,
+        _type: DataSourceType.CoinGecko,
       };
   
       const result = await spot(symbolObj, COINGECKO_API_KEY);
