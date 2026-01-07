@@ -1,11 +1,10 @@
 import chalk from "chalk";
 import { chart } from "../model/index.ts";
 import {
-    TerminalUserStateConfig, EnvironmentType,
-     CommandState, CommandResultType, DataSourceType,
-     APIKeyType, LogLevel
+    TerminalUserStateConfig,
+    CommandState, CommandResultType, DataSourceType,
+    LogLevel
 } from "../../types.ts";
-import { lensPath, view, set } from "ramda";
 import { inspectLogger } from "./../../utils/logging.ts"
 import { getLoadedToken, getCoinGeckoApiKey } from "./../../utils/index.ts";
 import { showLineChart } from "../../components/charting.ts";
