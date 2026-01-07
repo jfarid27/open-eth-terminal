@@ -1,4 +1,4 @@
-import { CommandResultType, CommandState, TerminalUserStateConfig } from "../../types.ts";
+import { CommandResultType, CommandState, TerminalUserStateConfig } from "./../../../types.ts";
 import news from "../model/index.ts";
 import chalk from "chalk";
 import { project, pipe, map } from "ramda";
@@ -22,6 +22,55 @@ const generateRedditDataFromFeed = pipe(
     }
   })
 );
+
+/**
+ * Return top posts from the given search term
+ * @param {TerminalUserStateConfig} st Terminal user state 
+ * @param {string} query Query term to fetch posts from 
+ * @param {number} limit Number of posts to fetch 
+ * @returns {CommandState} 
+ */
+export const redditSearchTopHandler = (st: TerminalUserStateConfig)=>
+    async (query: string, limit: number): Promise<CommandState> => {
+
+        let _query = query;
+        if (!_query) {
+            console.log(chalk.red("No query term supplied."))
+            return {
+                result: { type: CommandResultType.Error },
+                state: st,
+            };
+        }
+        
+        try {
+            const feed = await news.reddit.search(query, limit || 20);
+            
+            const redditData = generateRedditDataFromFeed(feed.items);
+            
+            
+            for (const item of redditData) {
+                console.log(chalk.green(item.title))
+                console.log(chalk.blue(item.date) + " | " + chalk.green(item.author))
+                console.log(chalk.red(item.link) + "\n")
+            }
+            
+            return {
+                result: { type: CommandResultType.Success },
+                state: st,
+            };
+
+        } catch (error) {
+            console.log(chalk.red("An error occured fetching the feed."))
+            
+            if (st.logLevel) {
+                console.log(error)
+            }
+            return {
+                result: { type: CommandResultType.Error },
+                state: st,
+            };
+        }
+}
 
 /**
  * Return top posts from the given subreddit
