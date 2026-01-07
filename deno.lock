@@ -1,0 +1,53 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@std/assert@^1.0.14": "1.0.16",
+    "jsr:@std/expect@*": "1.0.17",
+    "jsr:@std/internal@^1.0.10": "1.0.12",
+    "jsr:@std/internal@^1.0.12": "1.0.12"
+  },
+  "jsr": {
+    "@std/assert@1.0.16": {
+      "integrity": "6a7272ed1eaa77defe76e5ff63ca705d9c495077e2d5fd0126d2b53fc5bd6532",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.12"
+      ]
+    },
+    "@std/expect@1.0.17": {
+      "integrity": "316b47dd65c33e3151344eb3267bf42efba17d1415425f07ed96185d67fc04d9",
+      "dependencies": [
+        "jsr:@std/assert",
+        "jsr:@std/internal@^1.0.10"
+      ]
+    },
+    "@std/internal@1.0.12": {
+      "integrity": "972a634fd5bc34b242024402972cd5143eac68d8dffaca5eaa4dba30ce17b027"
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@inquirer/prompts@^8.1.0",
+        "npm:@observablehq/plot@~0.6.17",
+        "npm:@types/figlet@^1.7.0",
+        "npm:@types/jsdom@27",
+        "npm:@types/node@^25.0.3",
+        "npm:@types/ramda@~0.31.1",
+        "npm:@types/terminal-kit@^2.5.7",
+        "npm:axios@^1.13.2",
+        "npm:chalk@^5.6.2",
+        "npm:commander@^14.0.2",
+        "npm:d3@^7.9.0",
+        "npm:dotenv@^17.2.3",
+        "npm:figlet@^1.9.4",
+        "npm:jsdom@^27.0.1",
+        "npm:open@11",
+        "npm:ramda@0.32",
+        "npm:rss-parser@^3.13.0",
+        "npm:terminal-kit@^3.1.2",
+        "npm:ts-pattern@^5.9.0",
+        "npm:typescript@^5.9.3"
+      ]
+    }
+  }
+}

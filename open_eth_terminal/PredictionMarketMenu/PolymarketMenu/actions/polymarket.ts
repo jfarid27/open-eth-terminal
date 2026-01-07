@@ -107,10 +107,12 @@ const outcomePricesMapper = (r: string): string[] => {
 }
 
 /**
- * Processes the outcome data for the given market.
+ * Processes the outcome data for the given list of markets.
+ * 
+ * @param markets List of markets to process.
+ * @returns Array of [question, outcomes] pairs.
  */
-const processOutcomeData = pipe(
-    filter((r:any) => !r.closed),
+export const processOutcomeData = pipe(
     map((r:any) => {
         return [r.question, zipEventOutcomePrices(r)];
     }),
@@ -574,15 +576,17 @@ const portfolioAnalysisSpotHandler = async (st: TerminalUserStateConfig, portfol
     
     const portfolioDataPs = await pipe(
         map(async (position: PolymarketPosition): Promise<PolymarketSpotPosition> => {
+            applicationLogging(LogLevel.Debug)("Processing MarketData for slug: " + position.slug);
             const { outcomeData, response } = await processMarketDataBySlug(position.slug);
-            
+            applicationLogging(LogLevel.Info)("Question: ");
+            applicationLogging(LogLevel.Info)(response);
+            applicationLogging(LogLevel.Debug)("Processed OutcomeData");
+            applicationLogging(LogLevel.Debug)(outcomeData);
             const position_outcome = position.outcome;
-            const outcomePrice = find((outcome: any[]) => outcome[0] === position_outcome)(outcomeData[0][1])
+            const outcomePrice = outcomeData[0].length > 1 && find((outcome: any[]) => outcome[0] === position_outcome)(outcomeData[0][1])
             
             if (!outcomePrice || outcomePrice.length < 2) {
                 applicationLogging(LogLevel.Debug)(`Outcome ${position_outcome} not found for market ${position.slug}`);
-                applicationLogging(LogLevel.Debug)("Processed OutcomeData");
-                applicationLogging(LogLevel.Debug)(outcomeData[0][1]);
                 throw new Error(`Outcome ${position_outcome} not found for market ${position.slug}`); 
 
             }
