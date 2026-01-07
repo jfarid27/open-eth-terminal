@@ -10,7 +10,12 @@ import newsTerminal from "./NewsMenu/index.ts";
 
 import figlet from "figlet";
 
-import { ENVIRONMENT, LOG_LEVEL, COINGECKO_API_KEY, ALPHAVANTAGE_API_KEY, BLOCKCHAINCOM_API_KEY } from "./config.ts";
+import { 
+    ENVIRONMENT, LOG_LEVEL,
+    COINGECKO_API_KEY, ALPHAVANTAGE_API_KEY,
+    BLOCKCHAINCOM_API_KEY, FREECRYPTOAPI_API_KEY,
+} from "./config.ts";
+
 import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType, LogLevel, EnvironmentType } from "./types.ts";
 import { registerTerminalApplication } from "./utils/program_loader.ts";
 
@@ -167,6 +172,7 @@ export async function startMain() {
         coingecko: COINGECKO_API_KEY,
         alphavantage: ALPHAVANTAGE_API_KEY,
         blockchaincom: BLOCKCHAINCOM_API_KEY,
+        freecryptoapi: FREECRYPTOAPI_API_KEY,
     },
     loadedContext: {},
     scriptContext: {}
