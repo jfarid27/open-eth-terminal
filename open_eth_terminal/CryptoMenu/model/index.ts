@@ -1,22 +1,36 @@
 import { CryptoSymbolType } from "../types.ts";
 import { DataSourceType } from "../../types.ts";
-import { fetchSpotCoingecko } from "./CoinGeckoApi.ts";
+import { fetchSpotCoingecko, fetchChartCoingecko } from "./CoinGeckoApi.ts";
+import { fetchChartFreeCryptoAPI } from "./FreeCryptoAPIApi.ts";
 
 /**
  * Fetches the current price for a specified symbol.
  * @param symbol Specified symbol to fetch current price for.
+ * @param API_KEY API key to use for the request.
  */
-export async function spot(symbol: CryptoSymbolType, COINGECKO_API_KEY: string) {
+export function spot(symbol: CryptoSymbolType, API_KEY: string) {
     switch (symbol._type) {
         case DataSourceType.CoinGecko:
-            return await fetchSpotCoingecko(symbol, COINGECKO_API_KEY);
+            return fetchSpotCoingecko(symbol, API_KEY);
         default:
             throw new Error(`Unsupported symbol type: ${symbol._type}`);
     }
 }
 
-export async function chart(symbol: CryptoSymbolType, COINGECKO_API_KEY: string) {
-    return undefined;
+/**
+ * Fetches the chart for a specified symbol.
+ * @param symbol Specified symbol to fetch chart for.
+ * @param API_KEY API key to use for the request.
+ */
+export function chart(symbol: CryptoSymbolType, API_KEY: string) {
+    switch (symbol._type) {
+        case DataSourceType.FreeCryptoAPI:
+            return fetchChartFreeCryptoAPI(symbol, API_KEY);
+        case DataSourceType.CoinGecko:
+            return fetchChartCoingecko(symbol, API_KEY);
+        default:
+            throw new Error(`Unsupported symbol type: ${symbol._type}`);
+    }
 }
 
 export default { spot, chart };

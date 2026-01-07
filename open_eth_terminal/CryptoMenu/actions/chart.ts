@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { spot } from "../model/index.ts";
+import { chart } from "../model/index.ts";
 import {
     TerminalUserStateConfig, EnvironmentType,
      CommandState, CommandResultType, DataSourceType,
@@ -7,24 +7,25 @@ import {
 } from "../../types.ts";
 import { lensPath, view, set } from "ramda";
 import { inspectLogger } from "./../../utils/logging.ts"
-import { getCoinGeckoApiKey, getLoadedToken } from "./../../utils/index.ts";
+import { getLoadedToken, getCoinGeckoApiKey } from "./../../utils/index.ts";
+import { showLineChart } from "../../components/charting.ts";
 
 /**
- * Handler for the spot price command.
+ * Handler for the chart price command.
  * 
- * At the moment, all handing is done by the Coingecko API for spot.
+ * At the moment, all handing is done by CoinGeckoAPI for chart.
  * The function will error if no CoinGecko API key is provided on
  * the {@link TerminalUserStateConfig}.
  * 
  * @param st The {@link TerminalUserStateConfig} 
- * @param symbolStr The symbol to get the spot price for 
+ * @param symbolStr The symbol to get the chart for 
  * @returns {@link CommandState} 
  * @note The function is intended to expand to support multiple data sources.
  */
-export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
+export const chartPriceHandler = (st: TerminalUserStateConfig) => async (symbolStr: string): Promise<CommandState> => {
     const applicationLogging = inspectLogger(st);
     const API_KEY = getCoinGeckoApiKey(st);
-    
+
     if (!API_KEY) {
         console.log("No CoinGecko API key provided");
         return {
@@ -43,7 +44,7 @@ export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolSt
         };
     }
     
-    applicationLogging(LogLevel.Info)(`Fetching spot price for ${loadedTokenSymbol}`);
+    applicationLogging(LogLevel.Info)(`Fetching chart for ${loadedTokenSymbol}`);
     applicationLogging(LogLevel.Info)(`Using CoinGecko API key.`);
 
     try {
@@ -52,14 +53,13 @@ export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolSt
         id: loadedTokenSymbol.toLowerCase(),
         _type: DataSourceType.CoinGecko,
       };
-  
-      const result = await spot(symbolObj, API_KEY);
+      const chartData = await chart(symbolObj, API_KEY);
+      
+      await showLineChart(chartData.prices, "timestamp", "price", `${loadedTokenSymbol} Price`);
  
       applicationLogging(LogLevel.Debug)("Result: ");
-      applicationLogging(LogLevel.Debug)(result);
-  
-      console.log(chalk.yellow(`Symbol: ${result.symbol.name}`));
-      console.log(chalk.green(`Price: $${result.price}`));
+      applicationLogging(LogLevel.Debug)(chartData);
+
     } catch (error) {
         applicationLogging(LogLevel.Error)(error);
         console.log(chalk.red("Network Error"));
@@ -68,9 +68,10 @@ export const spotPriceHandler = (st: TerminalUserStateConfig) => async (symbolSt
             state: st,
         };
     }
-    
+
     return {
         result: { type: CommandResultType.Success },
         state: st,
     };
+    
 }

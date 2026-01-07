@@ -15,6 +15,7 @@ export enum APIKeyType {
     CoinGecko = "coingecko",
     Alphavantage = "alphavantage",
     BlockchainCom = "blockchaincom",
+    FreeCryptoAPI = "freecryptoapi",
 }
 
 /**
@@ -24,6 +25,7 @@ export enum DataSourceType {
     CoinGecko = 'coingecko',
     AlphaVantage = 'alphavantage',
     BlockchainCom = 'blockchaincom',
+    FreeCryptoAPI = 'freecryptoapi',
 }
    
 /**
@@ -33,6 +35,7 @@ export interface DatasourceKeyMapping {
     [DataSourceType.CoinGecko]: APIKeyType.CoinGecko;
     [DataSourceType.AlphaVantage]: APIKeyType.Alphavantage;
     [DataSourceType.BlockchainCom]: APIKeyType.BlockchainCom;
+    [DataSourceType.FreeCryptoAPI]: APIKeyType.FreeCryptoAPI;
 }
     
 /**
