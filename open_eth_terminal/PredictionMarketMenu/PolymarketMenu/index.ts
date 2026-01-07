@@ -8,6 +8,7 @@ import {
     predictionMarketsViewHandler,
     predictionMarketViewHandler,
     predictionEventViewHandler,
+    portfolioAnalysisHandler,
  } from './actions/polymarket.ts';
 
 /**
@@ -27,6 +28,18 @@ const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => 
         command: "event [slug]",
         description: "Fetch a specific event by slug.",
         action: predictionEventViewHandler,
+    },
+    {
+        name: "portfolio analysis",
+        command: "portfolio [type] [filename].csv",
+        description: `Give spot or chart analysis of a portfolio of polymarket positions.
+        
+        type: spot | chart
+        filename: filename of CSV portfolio file inside the top level './portfolios' directory
+        
+        See the readme in the './portfolios' directory for more information.
+        `,
+        action: portfolioAnalysisHandler,
     },
     {
         name: "market",

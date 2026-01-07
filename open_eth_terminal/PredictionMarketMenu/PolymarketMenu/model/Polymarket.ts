@@ -1,4 +1,5 @@
 import axios from "axios";
+import { pause } from "./../../../utils/timing.ts"
 
 /**
  * Fetches the list of available topic tags from Polymarket.
@@ -34,6 +35,7 @@ export async function fetchMarketDataBySlug(slug: string) {
 
     const url = `https://gamma-api.polymarket.com/markets/slug/${slug}`;
     const response = await axios.get(url);
+    await pause(1000);
     return response.data;
 }
 
@@ -92,6 +94,7 @@ export async function fetchTopEventData(limit: number = 10) {
             },
         }
     );
+    await pause(1000);
     return response.data;
 }
 
@@ -113,5 +116,6 @@ export async function fetchTopMarketData(limit: number = 10) {
             },
         }
     );
+    await pause(1000);
     return response.data;
 }

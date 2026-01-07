@@ -6,16 +6,22 @@
  */
 
 import { project, pipe, set, filter, toLower, lensProp, map,
-    lensPath, view, defaultTo, zip, tap,
-    props
+    lensPath, view, defaultTo, zip, tap, find,
+    props,
+    reduce
 } from "ramda";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import PredictionMarketsData from "./../model/index.ts";
-import {CommandResultType, CommandState, PredictionMarketsType } from "./../../../types.ts";
+import {CommandResultType, CommandState, PredictionMarketsType, LogLevel } from "./../../../types.ts";
 import { TerminalUserStateConfig } from "./../../../types.ts";
 import { ActionHandler } from "./../../../types.ts";
 import chalk from "chalk";
+import { inspectLogger } from "./../../../utils/logging.ts"
+import { loadCSVPortfolio } from "./../../../utils/loaders.ts";
+import { PolymarketPortfolio, PolymarketPosition, PortfolioAnalysisType } from "./types.ts";
+import { LOG_LEVEL } from "../../../config.ts";
+import { responseEncoding } from "axios";
 
 /**
  * Lens path for predictions markets data on the User State.
@@ -119,6 +125,57 @@ const zipEventOutcomePrices = (r: any) => {
         outcomePricesMapper(r.outcomePrices)
     );
 }
+
+/**
+ * Pull relevant market data from the polymarket API response for given slug.
+ */
+const xPolymarketEventData = props([
+    "slug",
+    "active",
+    "liquidity",
+    "volume",
+    "competitive"
+]);
+
+const xPolymarketMarketData = props([
+    "active",
+    "liquidityNum",
+    "volumeNum",
+]);
+
+/**
+ * Processes the event data for the given market by slug.
+ */
+const processEventDataBySlug = async (slug: string) => {
+    
+    const response = await PredictionMarketsData.polyMarketData.event.getBySlug(slug);
+    const processResponse = pipe(
+        (r: any) => ({
+            response: r,
+            marketData: xPolymarketEventData(r) as string[],
+            outcomeData: processOutcomeData(r.markets),
+        }),
+    );
+    return processResponse(response);
+};
+
+/**
+ * Processes the market data for the given market by slug.
+ */
+const processMarketDataBySlug = async (slug: string) => {
+    
+    const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
+    const processResponse = pipe(
+        (r: any) => ({
+            response: r,
+            marketData: xPolymarketMarketData(r) as string[],
+            outcomeData: processOutcomeData([r]),
+        }),
+    );
+    return processResponse(response);
+};
+
+
 /**
  * Fetches event for the given event slug.
  * @param st Terminal User State 
@@ -126,6 +183,7 @@ const zipEventOutcomePrices = (r: any) => {
  * @returns CommandState 
  */
 export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+    const applicationLogging = inspectLogger(st);
     
     if (!slug) {
         console.log("No slug provided");
@@ -135,23 +193,8 @@ export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateC
         };
     }
     
-    const response = await PredictionMarketsData.polyMarketData.event.getBySlug(slug);
-    
-    const xPolymarketMarketData = props([
-        "slug",
-        "active",
-        "liquidity",
-        "volume",
-        "competitive"
-    ]);
-    
-    const marketData = pipe(
-        xPolymarketMarketData,
-    )(response) as string[];
-    
-    const outcomeData = pipe(
-        processOutcomeData,
-    )(response.markets)
+    const { response, marketData, outcomeData } = await processEventDataBySlug(slug);
+    applicationLogging(LogLevel.Debug)(response);
     
     console.log(chalk.blue.bold("Market Data"))
     console.log(chalk.blue("Title: ") + response.title)
@@ -202,6 +245,7 @@ export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateC
  * @returns CommandState 
  */
 export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+    const applicationLogging = inspectLogger(st);
     
     if (!slug) {
         console.log("No slug provided");
@@ -211,21 +255,8 @@ export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserState
         };
     }
     
-    const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
-    
-    const xPolymarketMarketData = props([
-        "active",
-        "liquidityNum",
-        "volumeNum",
-    ])
-    
-    const marketData = pipe(
-        xPolymarketMarketData
-    )(response) as string[];
-    
-    const outcomeData = pipe(
-        processOutcomeData 
-    )([response])
+    const { response, marketData, outcomeData } = await processMarketDataBySlug(slug);
+    applicationLogging(LogLevel.Debug)(response);
     
     console.log(chalk.blue.bold("Market Data"))
     console.log(chalk.blue("Question: " + response.question))
@@ -276,7 +307,8 @@ export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserState
  * @returns CommandState 
  */
 export const predictionMarketsViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (tag?: string): Promise<CommandState> => {
-    
+    const applicationLogging = inspectLogger(st); 
+
     if (!tag) {
         console.log("No tag provided");
         return {
@@ -286,6 +318,8 @@ export const predictionMarketsViewHandler: ActionHandler = (st: TerminalUserStat
     }
     
     const markets = await PredictionMarketsData.polyMarketData.markets.getByTagId(tag);
+    
+    applicationLogging(LogLevel.Debug)(markets);
     
     const marketsData = pipe(
         xPolymarketMarketsData,
@@ -320,6 +354,8 @@ export const predictionMarketsViewHandler: ActionHandler = (st: TerminalUserStat
  */
 export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUserStateConfig) =>
     async (n?: string, term?: string) => {
+        
+        const applicationLogging = inspectLogger(st);
     
         if (st.logLevel) {
             console.log("Fetching top markets");
@@ -327,6 +363,8 @@ export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUser
         
         const limit = n ? Number(n) : 10;
         const markets = await PredictionMarketsData.polyMarketData.markets.top(limit);
+        
+        applicationLogging(LogLevel.Debug)(markets);
         
         let marketsData = pipe(
             xPolymarketMarketsData,
@@ -369,10 +407,16 @@ export const polymarketMarketsTopFetchHandler: ActionHandler = (st: TerminalUser
  */
 export const polymarketMarketsTagsFetchHandler: ActionHandler = (st: TerminalUserStateConfig) => async (search?: string) => {
     
+    const applicationLogging = inspectLogger(st);
+    
     if (st.logLevel) {
         console.log("Fetching tags");
     }
     const tags = await PredictionMarketsData.polyMarketData.tags.get();
+    
+    applicationLogging(LogLevel.Debug)("Tags fetched");
+    applicationLogging(LogLevel.Debug)(tags);
+    
     const formattedTags = processTags(tags);
     
     if (st.logLevel) {
@@ -397,6 +441,8 @@ export const polymarketMarketsTagsFetchHandler: ActionHandler = (st: TerminalUse
  */
 export const polymarketMarketsTagsSearchHandler: ActionHandler = (st: TerminalUserStateConfig) => async (search?: string) => {
     
+    const applicationLogging = inspectLogger(st); 
+    
     if (!search) {
         console.log("No search term provided");
         return {
@@ -407,8 +453,15 @@ export const polymarketMarketsTagsSearchHandler: ActionHandler = (st: TerminalUs
     
     const tags = view(xPolymarketTagData, st);
     
+    applicationLogging(LogLevel.Debug)("Stored Tags");
+    applicationLogging(LogLevel.Debug)(tags);
+    
     if (tags) {
         const filteredTags = filterTags(search)(tags);
+        
+        applicationLogging(LogLevel.Debug)("Filtered Tags");
+        applicationLogging(LogLevel.Debug)(filteredTags);
+        
         const tableFilteredObjects = filteredTags
             .map((tag: any) => [tag.label, tag.slug, tag.id]);
 
@@ -438,4 +491,146 @@ export const polymarketMarketsTagsSearchHandler: ActionHandler = (st: TerminalUs
         state: st,
     };
 
+}
+
+const  formatPortfolioToPolymarketPortfolio = pipe(
+    map((position: string[]): PolymarketPosition => {
+        return {
+            slug: position[0],
+            outcome: position[1],
+            amount: Number(position[2]),
+        };
+    }),
+    (positions: PolymarketPosition[]) => {
+        const polymarketPositions: PolymarketPortfolio = {
+            positions: positions,
+        }
+        return polymarketPositions;
+    }
+)
+
+export const portfolioAnalysisHandler: ActionHandler = (st: TerminalUserStateConfig) =>
+    async (type?: string, filename?: string) => {
+    
+        const applicationLogging = inspectLogger(st); 
+    
+        if (!type || !filename) {
+            console.log("No type or filename provided");
+            return {
+                result: { type: CommandResultType.Success },
+                state: st,
+            };
+        }
+        
+        applicationLogging(LogLevel.Info)(`Loading portfolio at file ./portfolios/${filename}`);
+
+        
+        let portfolio: PolymarketPortfolio | undefined = undefined;
+        try {
+            const loaded_portfolio = await loadCSVPortfolio(filename);
+            
+            portfolio = formatPortfolioToPolymarketPortfolio(loaded_portfolio);
+        } catch (err) {
+            
+            console.log("Error loading portfolio filename. Please check the filename and try again.")
+            applicationLogging(LogLevel.Error)(err);
+            return {
+                result: { type: CommandResultType.Error },
+                state: st,
+            };
+        }
+        
+        applicationLogging(LogLevel.Info)(portfolio);
+        
+        applicationLogging(LogLevel.Info)(`Fetching portfolio analysis for ${type} at file ./portfolios/${filename}`);
+        
+        if (type == PortfolioAnalysisType.Spot) {
+            return portfolioAnalysisSpotHandler(st, portfolio);
+        }
+        
+        
+        return {
+            result: { type: CommandResultType.Error},
+            state: st,
+        };
+}
+
+interface PositionPoint {
+    outcome: string;
+    price: number;
+    amount: number;
+    value: number;
+}
+
+interface PolymarketSpotPosition {
+    slug: string,
+    question: string,
+    positionPoint: PositionPoint
+}
+
+const portfolioAnalysisSpotHandler = async (st: TerminalUserStateConfig, portfolio: PolymarketPortfolio) => {
+    const applicationLogging = inspectLogger(st); 
+    applicationLogging(LogLevel.Debug)(`Running Portfolio SpotHandler`);
+    
+    const portfolioDataPs = await pipe(
+        map(async (position: PolymarketPosition): Promise<PolymarketSpotPosition> => {
+            const { outcomeData, response } = await processMarketDataBySlug(position.slug);
+            
+            const position_outcome = position.outcome;
+            const outcomePrice = find((outcome: any[]) => outcome[0] === position_outcome)(outcomeData[0][1])
+            
+            if (!outcomePrice || outcomePrice.length < 2) {
+                applicationLogging(LogLevel.Debug)(`Outcome ${position_outcome} not found for market ${position.slug}`);
+                applicationLogging(LogLevel.Debug)("Processed OutcomeData");
+                applicationLogging(LogLevel.Debug)(outcomeData[0][1]);
+                throw new Error(`Outcome ${position_outcome} not found for market ${position.slug}`); 
+
+            }
+            return {
+                slug: position.slug,
+                question: response.question,
+                positionPoint: {
+                    outcome: position.outcome,
+                    amount: position.amount,
+                    price: outcomePrice[1],
+                    value: position.amount * outcomePrice[1],
+                }
+            };
+        }),
+    )(portfolio.positions);
+    
+    const portfolioData: PolymarketSpotPosition[] = await Promise.all(portfolioDataPs);
+    const tablePortfolioData = map((r: PolymarketSpotPosition) => ([
+        r.question,
+        r.slug,
+        r.positionPoint.amount.toString(),
+        r.positionPoint.price.toString(),
+        r.positionPoint.value.toString(),
+    ]))(portfolioData);
+    
+    const totalValue = reduce((acc: number, r: PolymarketSpotPosition) => acc + r.positionPoint.value, 0)(portfolioData);
+    
+    applicationLogging(LogLevel.Debug)(portfolioData)
+
+    terminal.table([
+        ['Question', 'Slug', 'Amount', 'Price', 'Value'],
+        ...tablePortfolioData
+    ], {
+        hasBorder: true,
+        contentHasMarkup: true,
+        borderChars: 'lightRounded',
+        borderAttr: { color: 'green' },
+        textAttr: { bgColor: 'default' },
+        firstRowTextAttr: { bgColor: 'green' },
+        width: 120,
+        fit: true
+    });
+    
+    console.log(chalk.blue(`Portfolio Total Value: ${totalValue}`));
+
+    return {
+        result: { type: CommandResultType.Success},
+        state: st,
+    };
+    
 }
