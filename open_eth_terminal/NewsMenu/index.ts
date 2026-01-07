@@ -1,14 +1,20 @@
 import { registerTerminalApplication } from "../utils/program_loader.ts";
-import { Menu, MenuOption, TerminalUserStateConfig } from "../types.ts";
+import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "../types.ts";
 import { menuGlobals } from "../utils/menu_globals.ts";
-import { redditTopHandler } from "./actions/reddit.ts";
+import { redditTerminal } from "./RedditMenu/index.ts";
 
 const newsMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
     {
         name: "reddit",
         command: "reddit [subreddit] [limit]",
         description: "Fetch top posts from the given subreddit",
-        action: redditTopHandler,
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await redditTerminal(st);
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
     },
     ...menuGlobals(state),
 ]

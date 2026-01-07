@@ -1,4 +1,4 @@
-import { CommandResultType, CommandState, TerminalUserStateConfig } from "../../types.ts";
+import { CommandResultType, CommandState, TerminalUserStateConfig } from "./../../../types.ts";
 import news from "../model/index.ts";
 import chalk from "chalk";
 import { project, pipe, map } from "ramda";
