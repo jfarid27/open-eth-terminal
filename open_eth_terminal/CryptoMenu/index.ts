@@ -2,6 +2,7 @@ import { registerTerminalApplication } from "../utils/program_loader.ts";
 import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType, DataSourceType } from "../types.ts";
 import { menuGlobals } from "../utils/menu_globals.ts";
 import { spotPriceHandler } from "./actions/spot.ts";
+import { chartPriceHandler } from "./actions/chart.ts";
 import chalk from "chalk";
 import { lensPath, set, includes} from "ramda";
 
@@ -11,6 +12,12 @@ const cryptoMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
         command: "price [symbol]",
         description: "Fetch current price for the given symbol",
         action: spotPriceHandler,
+    },
+    {
+        name: "chart",
+        command: "chart [symbol]",
+        description: "Fetch chart for the given symbol",
+        action: chartPriceHandler,
     },
     {
         name: "set",
