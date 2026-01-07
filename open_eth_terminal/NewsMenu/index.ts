@@ -6,8 +6,8 @@ import { redditTerminal } from "./RedditMenu/index.ts";
 const newsMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
     {
         name: "reddit",
-        command: "reddit [subreddit] [limit]",
-        description: "Fetch top posts from the given subreddit",
+        command: "reddit",
+        description: "Navigate to the reddit menu",
         action: (st: TerminalUserStateConfig) => async () => {
             const newState = await redditTerminal(st);
             return {

@@ -1,7 +1,8 @@
-import { CommandResultType, CommandState, TerminalUserStateConfig } from "./../../../types.ts";
+import { CommandResultType, CommandState, TerminalUserStateConfig, LogLevel } from "./../../../types.ts";
 import news from "../model/index.ts";
+import { inspectLogger } from "./../../../utils/logging.ts";
 import chalk from "chalk";
-import { project, pipe, map } from "ramda";
+import { project, pipe, map, filter } from "ramda";
 
 const MAX_TITLE_LENGTH = 65;
 const MAX_AUTHOR_LENGTH = 25;
@@ -13,6 +14,7 @@ const MAX_AUTHOR_LENGTH = 25;
  */
 const generateRedditDataFromFeed = pipe(
   project(["pubDate", "title", "link", "author"]),
+  filter((r: any) => r.author),
   map((r: any) => {
     return {
       date: new Date(r.pubDate).toLocaleString(),
@@ -32,6 +34,7 @@ const generateRedditDataFromFeed = pipe(
  */
 export const redditSearchTopHandler = (st: TerminalUserStateConfig)=>
     async (query: string, limit: number): Promise<CommandState> => {
+        const applicationLogging = inspectLogger(st);
 
         let _query = query;
         if (!_query) {
@@ -44,6 +47,8 @@ export const redditSearchTopHandler = (st: TerminalUserStateConfig)=>
         
         try {
             const feed = await news.reddit.search(query, limit || 20);
+            applicationLogging(LogLevel.Info)("Feed fetched successfully.")
+            applicationLogging(LogLevel.Debug)(feed)
             
             const redditData = generateRedditDataFromFeed(feed.items);
             

@@ -20,8 +20,8 @@ const newsMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => [
 ]
 
 const newsMenu: Menu = {
-    name: "News Menu",
-    description: "Source news from various sources",
+    name: "Reddit Menu",
+    description: "Source news from Reddit",
     messagePrompt: "Select an option:",
     options: newsMenuOptions,
 }
