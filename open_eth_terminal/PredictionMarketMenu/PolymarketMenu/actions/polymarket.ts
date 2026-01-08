@@ -241,68 +241,6 @@ export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateC
 }
 
 /**
- * Fetches market for the given market id.
- * @param st Terminal User State 
- * @param tag Polymarket Defined Market ID. 
- * @returns CommandState 
- */
-export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
-    const applicationLogging = inspectLogger(st);
-    
-    if (!slug) {
-        console.log("No slug provided");
-        return {
-            result: { type: CommandResultType.Success },
-            state: st,
-        };
-    }
-    
-    const { response, marketData, outcomeData } = await processMarketDataBySlug(slug);
-    applicationLogging(LogLevel.Debug)(response);
-    
-    console.log(chalk.blue.bold("Market Data"))
-    console.log(chalk.blue("Question: " + response.question))
-    console.log(chalk.blue("Slug: " + response.slug))
-    console.log(chalk.yellow("Description: " + response.description))
-    
-    terminal.table([
-        ['Active', 'Liquidity', 'Volume'],
-        marketData,
-    ], {
-        hasBorder: true,
-        contentHasMarkup: true,
-        borderChars: 'lightRounded',
-        borderAttr: { color: 'green' },
-        textAttr: { bgColor: 'default' },
-        firstRowTextAttr: { bgColor: 'green' },
-        width: 120,
-        fit: true
-    });
-
-    for (const [question, outcomePrices] of outcomeData) {
-        terminal.table([
-            [question, ""],
-            ['Outcome', 'Price'],
-            ...outcomePrices,
-        ], {
-            hasBorder: true,
-            contentHasMarkup: true,
-            borderChars: 'lightRounded',
-            borderAttr: { color: 'green' },
-            textAttr: { bgColor: 'default' },
-            firstRowTextAttr: { bgColor: 'blue' },
-            width: 120,
-            fit: true
-        });
-    }
-
-    return {
-        result: { type: CommandResultType.Success },
-        state: st,
-    };
-}
-
-/**
  * Fetches markets linked to the given tag (default: all)
  * @param st Terminal User State 
  * @param tag Polymarket Defined Tag ID. 
