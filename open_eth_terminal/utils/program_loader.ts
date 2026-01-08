@@ -99,6 +99,7 @@ export const registerTerminalApplication = (menu: Menu) => {
             }
 
             if (!input) return terminalApplication(st);
+            terminal('\n');
 
             const program = new Command();
             program.exitOverride();
