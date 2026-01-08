@@ -92,7 +92,6 @@ export const registerTerminalApplication = (menu: Menu) => {
                 terminal(menu.name + " > ");
                 const answer = await new Promise<string>((resolve) => {
                     terminal.inputField((error, input) => {
-                        terminal('\n');
                         resolve(input || '');
                     });
                 });
