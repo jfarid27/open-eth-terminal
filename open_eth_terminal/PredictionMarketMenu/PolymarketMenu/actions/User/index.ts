@@ -25,6 +25,9 @@ import { ActionHandler } from "../../../../types.ts";
 import chalk from "chalk";
 import { inspectLogger } from "../../../../utils/logging.ts"
 
+/**
+ * Pick the title, size, currentValue, and slug from the response.
+ */
 export const processUserData = pipe(
     project(['title', 'size', 'currentValue', 'slug']),
 );
@@ -32,6 +35,11 @@ export const processUserData = pipe(
 const currentValueProp = prop('currentValue');
 const realizedPnlProp = prop('realizedPnl');
 
+/**
+ * Processes user account data from response, aggregating their net values and pnls..
+ * @param data User account data.
+ * @returns Processed user account data.
+ */
 export const processUserAccountData = pipe(
     reduce((acc, val: any) => {
         return {
@@ -66,7 +74,7 @@ export const predictionUserPositionsHandler: ActionHandler = (st: TerminalUserSt
     console.log(chalk.blue.bold("User Positions"))
     
     const userData = processUserData(response);
-    const accountData = processUserAccountData(userData);
+    const accountData = processUserAccountData(response);
 
     terminal.table([
         ["Title", "Size", "Current Value", "Slug"],
