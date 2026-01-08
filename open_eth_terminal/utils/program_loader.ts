@@ -2,7 +2,6 @@ import chalk from "chalk";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import { Command } from "commander";
-import { input as inquirer } from '@inquirer/prompts';
 import {
     CommandState, CommandResultType, Menu, MenuOption,
     TerminalUserStateConfig, LogLevel
@@ -90,8 +89,12 @@ export const registerTerminalApplication = (menu: Menu) => {
                 console.log(chalk.yellow(`Executing script command: ${input}`));
                 isScriptExecution = true;
             } else {
-                const answer = await inquirer({
-                    message: menu.name + " >",
+                terminal(menu.name + " > ");
+                const answer = await new Promise<string>((resolve) => {
+                    terminal.inputField((error, input) => {
+                        terminal('\n');
+                        resolve(input || '');
+                    });
                 });
                 input = answer?.trim();
             }
