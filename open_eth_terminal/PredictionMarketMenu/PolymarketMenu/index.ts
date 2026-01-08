@@ -6,11 +6,11 @@ import {
     polymarketMarketsTagsFetchHandler,
     polymarketMarketsTagsSearchHandler,
     predictionMarketsViewHandler,
-    predictionEventViewHandler,
     portfolioAnalysisHandler,
  } from './actions/polymarket.ts';
  import { predictionUserPositionsHandler } from './actions/User/index.ts';
  import { predictionMarketViewHandler } from './actions/Market/index.ts';
+ import { predictionEventViewHandler } from './actions/Event/index.ts';
 
 /**
  *  Prediction Markets Menu Options.
