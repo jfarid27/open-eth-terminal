@@ -119,3 +119,15 @@ export async function fetchTopMarketData(limit: number = 10) {
     await pause(1000);
     return response.data;
 }
+
+export async function fetchUserPositions(address: string) {
+    const response = await axios.get(
+        `https://data-api.polymarket.com/positions/`,
+        {
+            params: {
+                user: address,
+            },
+        }
+    );
+    return response.data;
+}
