@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { ActionOptions, CommandResultType, TerminalUserStateConfig, EnvironmentType, MenuOption } from "../types.ts";
 
 const menu_back: MenuOption = {
@@ -7,6 +8,19 @@ const menu_back: MenuOption = {
     action: (st: TerminalUserStateConfig) => async (ops?: ActionOptions) => {
         return {
             result: { type: CommandResultType.Back },
+            state: st,
+        };
+    },
+};
+
+const menu_back_top: MenuOption = {
+    name: "back",
+    command: "back",
+    description: "Go back to the previous menu",
+    action: (st: TerminalUserStateConfig) => async (ops?: ActionOptions) => {
+        console.log(chalk.yellow("You are already at the main menu."));
+        return {
+            result: { type: CommandResultType.Success },
             state: st,
         };
     },
@@ -60,7 +74,7 @@ export const menuGlobals = (st: TerminalUserStateConfig): MenuOption[] => {
  */
 export const menuGlobalsTop = (st: TerminalUserStateConfig): MenuOption[] => {
     if (st.environment === EnvironmentType.Development) {
-        return [menu_top, menu_showconfig];
+        return [menu_top, menu_back_top, menu_showconfig];
     }
-    return [menu_top, menu_back];
+    return [menu_top, menu_back_top];
 }
