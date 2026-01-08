@@ -129,5 +129,6 @@ export async function fetchUserPositions(address: string) {
             },
         }
     );
+    await pause(1000);
     return response.data;
 }
