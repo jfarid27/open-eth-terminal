@@ -2,6 +2,7 @@ import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType } from "./
 import { registerTerminalApplication } from "./../utils/program_loader.ts";
 import { menuGlobals } from "./../utils/menu_globals.ts";
 import polymarketTerminal from "./PolymarketMenu/index.ts";
+import kalshiTerminal from "./KalshiMenu/index.ts";
 
 /**
  *  Prediction Markets Menu Options.
@@ -13,6 +14,18 @@ const predictionMarketsMenuOptions = (state: TerminalUserStateConfig): MenuOptio
         description: `Enter the polymarket menu`,
         action: (st: TerminalUserStateConfig) => async () => {
             const newState = await polymarketTerminal(st);
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
+    },
+    {
+        name: "kalshi",
+        command: "kalshi",
+        description: `Enter the kalshi menu`,
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await kalshiTerminal(st);
             return {
                 result: { type: CommandResultType.Success },
                 state: newState,
