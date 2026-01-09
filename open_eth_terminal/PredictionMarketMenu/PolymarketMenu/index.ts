@@ -6,9 +6,11 @@ import {
     polymarketMarketsTagsFetchHandler,
     polymarketMarketsTagsSearchHandler,
     predictionMarketsViewHandler,
-    predictionMarketViewHandler,
-    predictionEventViewHandler,
+    portfolioAnalysisHandler,
  } from './actions/polymarket.ts';
+ import { predictionUserPositionsHandler } from './actions/User/index.ts';
+ import { predictionMarketViewHandler } from './actions/Market/index.ts';
+ import { predictionEventViewHandler } from './actions/Event/index.ts';
 
 /**
  *  Prediction Markets Menu Options.
@@ -29,9 +31,26 @@ const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => 
         action: predictionEventViewHandler,
     },
     {
+        name: "portfolio analysis",
+        command: "portfolio [type] [filename].csv",
+        description: `Give spot or chart analysis of a portfolio of polymarket positions.
+        
+        type: spot | chart
+        filename: filename of CSV portfolio file inside the top level './portfolios' directory
+        
+        See the readme in the './portfolios' directory for more information.
+        `,
+        action: portfolioAnalysisHandler,
+    },
+    {
         name: "market",
-        command: "market [slug]",
-        description: "Fetch a specific market by slug.",
+        command: "market <slug> [type]",
+        description: `Fetch a specific market by slug.
+        
+        type (optional): spot | chart
+            - spot (default): show current market details
+            - chart: show historical price chart for the market
+        `,
         action: predictionMarketViewHandler,
     },
     {
@@ -45,6 +64,12 @@ const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => 
         command: "search [symbol]",
         description: "Fetch available event and market tags useful for filtering.",
         action: polymarketMarketsTagsSearchHandler,
+    },
+    {
+        name: "user positions",
+        command: "user [address]",
+        description: "Fetch user positions for the given address.",
+        action: predictionUserPositionsHandler,
     },
     {
         name: "load",

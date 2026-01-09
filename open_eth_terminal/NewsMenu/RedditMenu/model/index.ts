@@ -1,7 +1,8 @@
-import { getRedditBest } from "./reddit.ts";
+import { getRedditBest, getRedditSearchTop } from "./reddit.ts";
 
 export const reddit = {
     get: getRedditBest,
+    search: getRedditSearchTop,
 }
 
 
