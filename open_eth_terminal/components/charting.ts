@@ -151,7 +151,7 @@ export async function showMultiLineChart(
     const plot = Plot.plot({
         document: document,
         title,
-        subtitle: series.map((s, i) => `${s.label} (${s.options?.color || 'steelblue'})`).join('  •  '),
+        subtitle: series.map((s) => `${s.label} (${s.options?.color || 'steelblue'})`).join('  •  '),
         style: {
             background: "black",
             color: "white",
@@ -168,7 +168,7 @@ export async function showMultiLineChart(
 
     // Ensure the SVG element itself has the background style, 
     // so it persists when 'show' extracts it from the figure wrapper.
-    const svg = plot.tagName.toLowerCase() === "svg" ? plot : plot.querySelector("svg");
+    const svg = plot && plot.tagName && plot.tagName.toLowerCase() === "svg" ? plot : plot.querySelector("svg");
     if (svg) {
         svg.setAttribute("style", "background-color: black; color: white;");
         
