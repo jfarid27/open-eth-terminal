@@ -6,7 +6,7 @@ import terminalKit from "terminal-kit";
 import PredictionMarketsData from "./../../model/index.ts";
 const { terminal } = terminalKit;
 import { inspectLogger } from "./../../../../utils/logging.ts";
-import { showLineChart } from "./../../../../components/charting.ts";
+import { showLineChart, showMultiLineChart, TimeSeriesData } from "./../../../../components/charting.ts";
 import chalk from "chalk";
 import { zip, pipe, props, map, prop } from "ramda";
 
@@ -105,8 +105,28 @@ export const marketChartHandler: ActionHandler = (st: TerminalUserStateConfig) =
         const yesPricesProcessed = processMarketPriceHistory(yesPrices);
         const noPricesProcessed = processMarketPriceHistory(noPrices);
         
-        await showLineChart(yesPricesProcessed, "timestamp", "price", response.question + ": Yes");
-        await showLineChart(noPricesProcessed, "timestamp", "price", response.question + ": No");
+        // Create time series data for the multi-line chart
+        const timeSeries: TimeSeriesData[] = [
+            {
+                label: "Yes",
+                data: yesPricesProcessed,
+                options: { color: "red" }
+            },
+            {
+                label: "No",
+                data: noPricesProcessed,
+                options: { color: "blue" }
+            }
+        ];
+        
+        await showMultiLineChart(
+            timeSeries,
+            "timestamp",
+            "price",
+            "Date",
+            "Price",
+            response.question
+        );
     } catch (error) {
         applicationLogging(LogLevel.Error)(error);
         console.log(chalk.red("Network Error"));
