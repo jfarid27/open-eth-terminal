@@ -99,7 +99,7 @@ export const fredHandler = (st: TerminalUserStateConfig) => async (
         
         applicationLogging(LogLevel.Debug)(result);
 
-        const processed = processFredData(result) as Record<string, string | number>[];
+        const processed = processFredData(result);
         
         // Filter out non-numeric values (FRED returns "." for missing data and other invalid values)
         const validData = processed.filter(d => {
