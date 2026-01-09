@@ -1,7 +1,7 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import { mockMarketData } from "./constants.ts";
-import { processMarketSlugDataResponse } from "./index.ts"
+import { processMarketSlugDataResponse, processMarketPriceHistory } from "./index.ts"
 
 describe("Polymarket Market Data Transformer", () => {
     const { marketData, outcomeData } = processMarketSlugDataResponse(mockMarketData); 
@@ -46,5 +46,38 @@ describe("Polymarket Market Data Transformer", () => {
         });
     });
     
+    describe("Price History Processing", () => {
+        it("should process price history correctly with timestamp and price fields", () => {
+            const mockPriceHistory = {
+                history: [
+                    { t: 1704067200, p: 0.42 },
+                    { t: 1704153600, p: 0.45 },
+                    { t: 1704240000, p: 0.43 }
+                ]
+            };
+            
+            const processed = processMarketPriceHistory(mockPriceHistory);
+            
+            expect(processed.length,
+                "Should have correct number of price points"
+            ).toBe(3);
+            
+            expect(processed[0].timestamp,
+                "First timestamp should be correctly extracted"
+            ).toBe(1704067200);
+            
+            expect(processed[0].price,
+                "First price should be correctly extracted"
+            ).toBe(0.42);
+            
+            expect(processed[1].timestamp,
+                "Second timestamp should be correctly extracted"
+            ).toBe(1704153600);
+            
+            expect(processed[1].price,
+                "Second price should be correctly extracted"
+            ).toBe(0.45);
+        });
+    });
     
 });
