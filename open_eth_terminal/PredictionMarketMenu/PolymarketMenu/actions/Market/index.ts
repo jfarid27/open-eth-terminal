@@ -76,27 +76,37 @@ export const processMarketPriceHistory = pipe(
 export const marketChartHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug: string): Promise<CommandState> => {
     const applicationLogging = inspectLogger(st);
     applicationLogging(LogLevel.Info)(`Fetching chart for ${slug}`);
-    const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
-    applicationLogging(LogLevel.Debug)(response);
-    const clobIds = splitClobIds(response);
-    applicationLogging(LogLevel.Debug)(clobIds);
     
-    const yesPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[0]);
-    const noPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[1]);
-    applicationLogging(LogLevel.Debug)(yesPrices);
-    applicationLogging(LogLevel.Debug)(noPrices);
-    
-    const yesPricesProcessed = processMarketPriceHistory(yesPrices);
-    const noPricesProcessed = processMarketPriceHistory(noPrices);
-    
-    await showLineChart(yesPricesProcessed, "timestamp", "price", response.question + ": Yes");
-    await showLineChart(noPricesProcessed, "timestamp", "price", response.question + ": No");
+    try {
+        const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
+        applicationLogging(LogLevel.Debug)(response);
+        const clobIds = splitClobIds(response);
+        applicationLogging(LogLevel.Debug)(clobIds);
 
+        const yesPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[0]);
+        const noPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[1]);
+        applicationLogging(LogLevel.Debug)(yesPrices);
+        applicationLogging(LogLevel.Debug)(noPrices);
+        
+        const yesPricesProcessed = processMarketPriceHistory(yesPrices);
+        const noPricesProcessed = processMarketPriceHistory(noPrices);
+        
+        await showLineChart(yesPricesProcessed, "timestamp", "price", response.question + ": Yes");
+        await showLineChart(noPricesProcessed, "timestamp", "price", response.question + ": No");
+    } catch (error) {
+        applicationLogging(LogLevel.Error)(error);
+        console.log(chalk.red("Network Error"));
+        return {
+            result: { type: CommandResultType.Error },
+            state: st,
+        };
+    }
+    
     return {
         result: { type: CommandResultType.Success },
         state: st,
     };
-
+    
 }
 
 /**

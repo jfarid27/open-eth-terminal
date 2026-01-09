@@ -8,8 +8,6 @@ describe("Polymarket Event Data Transformer", () => {
     const outcomePoint = outcomeData[0];
     const outcomes = outcomePoint[1];
     
-    describe("Event Data")
-    
     describe("Market Data", () => {
         it("should return the correct market data", () => {
             
