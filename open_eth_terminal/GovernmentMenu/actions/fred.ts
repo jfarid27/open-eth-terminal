@@ -13,15 +13,17 @@ import { pipe, prop, map, sortBy } from "ramda";
  * Process the FRED series data by transforming observations into
  * an array of objects with date, value, timestamp
  * @param data raw object data from FRED API 
+ * @param useUnixSeconds if true, convert timestamp to Unix seconds; otherwise use milliseconds
  * @returns object array with date, value, timestamp
  */
-const processFredData = pipe(
+const processFredData = (useUnixSeconds: boolean = false) => pipe(
     prop("observations"),
     map((obs: any) => {
+        const timestamp = new Date(obs.date).getTime();
         return {
             date: obs.date,
             value: parseFloat(obs.value),
-            timestamp: new Date(obs.date).getTime()
+            timestamp: useUnixSeconds ? Math.floor(timestamp / 1000) : timestamp
         };
     }),
     sortBy(prop("timestamp"))
@@ -69,10 +71,13 @@ export const fredHandler = (st: TerminalUserStateConfig) => async (
         
         applicationLogging(LogLevel.Debug)(result);
 
-        const processed = processFredData(result) as Record<string, string | number>[];
+        const processed = processFredData(false)(result) as Record<string, string | number>[];
         
-        // Filter out non-numeric values (FRED sometimes returns "." for missing data)
-        const validData = processed.filter(d => !isNaN(d.value as number));
+        // Filter out non-numeric values (FRED returns "." for missing data and other invalid values)
+        const validData = processed.filter(d => {
+            const val = d.value;
+            return typeof val === 'number' && !isNaN(val) && isFinite(val);
+        });
         
         if (validData.length === 0) {
             console.log(chalk.yellow("No valid data found for the specified series and date range"));
@@ -97,21 +102,6 @@ export const fredHandler = (st: TerminalUserStateConfig) => async (
         };
     }
 }
-
-/**
- * Process FRED data for multi-line charts with Unix timestamp conversion
- */
-const processFredDataForMultiChart = pipe(
-    prop("observations"),
-    map((obs: any) => {
-        return {
-            date: obs.date,
-            value: parseFloat(obs.value),
-            timestamp: Math.floor(new Date(obs.date).getTime() / 1000) // Convert to Unix seconds
-        };
-    }),
-    sortBy(prop("timestamp"))
-);
 
 /**
  * Handler for fetching and charting multiple FRED series on one chart
@@ -161,6 +151,11 @@ export const fredv2Handler = (st: TerminalUserStateConfig) => async (
         }
 
         console.log(chalk.blue(`Fetching ${seriesIds.length} FRED series...`));
+        
+        // Warn if too many series
+        if (seriesIds.length > 8) {
+            console.log(chalk.yellow(`Warning: Charting ${seriesIds.length} series. Colors will repeat after 8 series.`));
+        }
 
         // Define colors for different series
         const colors = ['dodgerblue', 'orange', 'green', 'red', 'purple', 'yellow', 'cyan', 'magenta'];
@@ -174,10 +169,13 @@ export const fredv2Handler = (st: TerminalUserStateConfig) => async (
 
             try {
                 const result = await government.fred.get(seriesObj, startDate, endDate, FRED_API_KEY);
-                const processed = processFredDataForMultiChart(result) as Record<string, string | number>[];
+                const processed = processFredData(true)(result) as Record<string, string | number>[];
                 
-                // Filter out non-numeric values (FRED sometimes returns "." for missing data)
-                const validData = processed.filter(d => !isNaN(d.value as number));
+                // Filter out non-numeric values (FRED returns "." for missing data and other invalid values)
+                const validData = processed.filter(d => {
+                    const val = d.value;
+                    return typeof val === 'number' && !isNaN(val) && isFinite(val);
+                });
                 
                 return {
                     label: seriesId,
