@@ -15,7 +15,7 @@ import { pipe, prop, map, sortBy } from "ramda";
  * @param data raw object data from FRED API 
  * @returns object array with date, value, timestamp
  */
-const processFredData = pipe(
+export const processFredData = pipe(
     prop("observations"),
     map((obs: any) => {
         return {
