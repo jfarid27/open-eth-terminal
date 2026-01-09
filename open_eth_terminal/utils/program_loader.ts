@@ -92,7 +92,6 @@ export const registerTerminalApplication = (menu: Menu) => {
                 terminal(menu.name + " > ");
                 const answer = await new Promise<string>((resolve) => {
                     terminal.inputField((error, input) => {
-                        terminal('\n');
                         resolve(input || '');
                     });
                 });
@@ -100,6 +99,7 @@ export const registerTerminalApplication = (menu: Menu) => {
             }
 
             if (!input) return terminalApplication(st);
+            terminal('\n');
 
             const program = new Command();
             program.exitOverride();

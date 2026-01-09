@@ -128,38 +128,12 @@ const zipEventOutcomePrices = (r: any) => {
     );
 }
 
-/**
- * Pull relevant market data from the polymarket API response for given slug.
- */
-const xPolymarketEventData = props([
-    "slug",
-    "active",
-    "liquidity",
-    "volume",
-    "competitive"
-]);
 
 const xPolymarketMarketData = props([
     "active",
     "liquidityNum",
     "volumeNum",
 ]);
-
-/**
- * Processes the event data for the given market by slug.
- */
-const processEventDataBySlug = async (slug: string) => {
-    
-    const response = await PredictionMarketsData.polyMarketData.event.getBySlug(slug);
-    const processResponse = pipe(
-        (r: any) => ({
-            response: r,
-            marketData: xPolymarketEventData(r) as string[],
-            outcomeData: processOutcomeData(r.markets),
-        }),
-    );
-    return processResponse(response);
-};
 
 /**
  * Processes the market data for the given market by slug.
@@ -176,131 +150,6 @@ const processMarketDataBySlug = async (slug: string) => {
     );
     return processResponse(response);
 };
-
-
-/**
- * Fetches event for the given event slug.
- * @param st Terminal User State 
- * @param slug Polymarket Defined Event Slug. 
- * @returns CommandState 
- */
-export const predictionEventViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
-    const applicationLogging = inspectLogger(st);
-    
-    if (!slug) {
-        console.log("No slug provided");
-        return {
-            result: { type: CommandResultType.Success },
-            state: st,
-        };
-    }
-    
-    const { response, marketData, outcomeData } = await processEventDataBySlug(slug);
-    applicationLogging(LogLevel.Debug)(response);
-    
-    console.log(chalk.blue.bold("Market Data"))
-    console.log(chalk.blue("Title: ") + response.title)
-    console.log(chalk.blue("Description: ") + response.description)
-
-    terminal.table([
-        ['Slug', 'Active', 'Liquidity', 'Volume', 'Competitive'],
-        marketData,
-    ], {
-        hasBorder: true,
-        contentHasMarkup: true,
-        borderChars: 'lightRounded',
-        borderAttr: { color: 'green' },
-        textAttr: { bgColor: 'default' },
-        firstRowTextAttr: { bgColor: 'green' },
-        width: 120,
-        fit: true
-    });
-    
-    console.log(chalk.blue.bold("Outcome Data"))
-    
-    for (const [question, outcomePrices] of outcomeData) {
-        terminal.table([
-            [question, ""],
-            ['Outcome', 'Price'],
-            ...outcomePrices,
-        ], {
-            hasBorder: true,
-            contentHasMarkup: true,
-            borderChars: 'lightRounded',
-            borderAttr: { color: 'green' },
-            textAttr: { bgColor: 'default' },
-            firstRowTextAttr: { bgColor: 'blue' },
-            width: 120,
-            fit: true
-        });
-    }
-    return {
-        result: { type: CommandResultType.Success },
-        state: st,
-    };
-}
-
-/**
- * Fetches market for the given market id.
- * @param st Terminal User State 
- * @param tag Polymarket Defined Market ID. 
- * @returns CommandState 
- */
-export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
-    const applicationLogging = inspectLogger(st);
-    
-    if (!slug) {
-        console.log("No slug provided");
-        return {
-            result: { type: CommandResultType.Success },
-            state: st,
-        };
-    }
-    
-    const { response, marketData, outcomeData } = await processMarketDataBySlug(slug);
-    applicationLogging(LogLevel.Debug)(response);
-    
-    console.log(chalk.blue.bold("Market Data"))
-    console.log(chalk.blue("Question: " + response.question))
-    console.log(chalk.blue("Slug: " + response.slug))
-    console.log(chalk.yellow("Description: " + response.description))
-    
-    terminal.table([
-        ['Active', 'Liquidity', 'Volume'],
-        marketData,
-    ], {
-        hasBorder: true,
-        contentHasMarkup: true,
-        borderChars: 'lightRounded',
-        borderAttr: { color: 'green' },
-        textAttr: { bgColor: 'default' },
-        firstRowTextAttr: { bgColor: 'green' },
-        width: 120,
-        fit: true
-    });
-
-    for (const [question, outcomePrices] of outcomeData) {
-        terminal.table([
-            [question, ""],
-            ['Outcome', 'Price'],
-            ...outcomePrices,
-        ], {
-            hasBorder: true,
-            contentHasMarkup: true,
-            borderChars: 'lightRounded',
-            borderAttr: { color: 'green' },
-            textAttr: { bgColor: 'default' },
-            firstRowTextAttr: { bgColor: 'blue' },
-            width: 120,
-            fit: true
-        });
-    }
-
-    return {
-        result: { type: CommandResultType.Success },
-        state: st,
-    };
-}
 
 /**
  * Fetches markets linked to the given tag (default: all)

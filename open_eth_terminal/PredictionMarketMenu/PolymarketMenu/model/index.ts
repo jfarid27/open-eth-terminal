@@ -5,6 +5,7 @@ import {
     fetchMarketDataBySlug,
     fetchEventDataBySlug,
     fetchUserPositions,
+    fetchMarketPriceHistoryByClobId,
 } from "./Polymarket.ts";
 
 const PolymarketData = {
@@ -24,6 +25,7 @@ const PolymarketData = {
     },
     market: {
         getBySlug: fetchMarketDataBySlug,
+        prices: fetchMarketPriceHistoryByClobId,
     },
     user: {
         getPositions: fetchUserPositions,

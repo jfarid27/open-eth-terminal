@@ -37,4 +37,4 @@ jobs:
         run: "deno check"
 
       - name: Test step
-        run: "deno test --allow-env"
+        run: "deno test --allow-env --allow-read=./node_modules --allow-sys"
