@@ -62,7 +62,7 @@ export const fredHandler = (st: TerminalUserStateConfig) => async (
     try {
         const seriesObj = {
             seriesId: seriesId,
-            _type: DataSourceType.Fred,
+            _type: DataSourceType.Fred as DataSourceType.Fred,
         };
 
         const result = await government.fred.get(seriesObj, startDate, endDate, FRED_API_KEY);
