@@ -32,7 +32,7 @@ describe("Polymarket Market Data Transformer", () => {
         it("should return the correct market data", () => {
             
             expect(marketData[0],
-                "Title should be correctly identified"
+                "Active should be correctly identified"
             ).toBe(mockMarketData.active);
 
             expect(marketData[1],
