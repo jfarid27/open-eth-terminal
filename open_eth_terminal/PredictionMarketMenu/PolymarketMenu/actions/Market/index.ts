@@ -73,7 +73,7 @@ export const processMarketPriceHistory = pipe(
  * @param slug Polymarket Defined Market Slug. 
  * @returns CommandState 
  */
-export const marketChartHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+export const marketChartHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug: string): Promise<CommandState> => {
     const applicationLogging = inspectLogger(st);
     applicationLogging(LogLevel.Info)(`Fetching chart for ${slug}`);
     const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
