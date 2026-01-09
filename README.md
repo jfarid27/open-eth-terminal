@@ -35,12 +35,15 @@ It is highly recommended to use Deno for this application. Node.js is supported 
 ### Environment Variables
 Set up your environment variables:
     *   Create a `.env` file in the root directory.
-    *   Add your CoinGecko API key (and other configurations as needed):
+    *   Add your API keys (and other configurations as needed):
         ```env
         COINGECKO_API_KEY=your_api_key_here
+        FRED_API_KEY=your_fred_api_key_here
         ENVIRONMENT=development # or production
         DEBUG=false
         ```
+    
+    To get a FRED API key, register at [https://fred.stlouisfed.org/docs/api/api_key.html](https://fred.stlouisfed.org/docs/api/api_key.html)
 
 ## Usage
 
@@ -81,7 +84,28 @@ crypto
 price ethereum
 price aave
 back
+government
+fred GNPCA 2020-01-01 2024-12-31
+back
 ```
+
+### Government Economic Data
+
+The Government menu provides access to economic data from the Federal Reserve Economic Data (FRED) API.
+
+To use the FRED features:
+1. Set your FRED API key in the `.env` file or use the `keys` command: `keys fred your_api_key_here`
+2. Navigate to the government menu: `government`
+3. Use the `fred` command to fetch and chart economic data series:
+   ```
+   fred GNPCA 2020-01-01 2024-12-31
+   ```
+   Where:
+   - `GNPCA` is the series ID (e.g., GNPCA for Gross National Product)
+   - `2020-01-01` is the start date (YYYY-MM-DD format)
+   - `2024-12-31` is the end date (YYYY-MM-DD format)
+
+You can find series IDs by browsing [FRED](https://fred.stlouisfed.org/).
 
 ## Development
 
