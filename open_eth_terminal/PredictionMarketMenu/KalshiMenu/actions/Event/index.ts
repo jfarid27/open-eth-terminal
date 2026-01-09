@@ -8,7 +8,7 @@ import {
 import { TerminalUserStateConfig } from "./../../../../types.ts";
 import { ActionHandler } from "./../../../../types.ts";
 import chalk from "chalk";
-import { inspectLogger } from "./../../../../utils/logging.ts"
+import { inspectLogger } from "./../../../../utils/logging.ts";
 import PredictionMarketsData from "./../../model/index.ts";
 
 /**
@@ -29,10 +29,11 @@ const extractMarketSummary = (market: any) => {
  * Extract bid/ask data with computed spreads for yes/no options
  */
 const extractBidAskData = (market: any) => {
-    const yesBid = parseFloat(market.yes_bid_dollars || "0");
-    const yesAsk = parseFloat(market.yes_ask_dollars || "0");
-    const noBid = parseFloat(market.no_bid_dollars || "0");
-    const noAsk = parseFloat(market.no_ask_dollars || "0");
+    // Parse bid/ask values, will be NaN if invalid
+    const yesBid = parseFloat(market.yes_bid_dollars);
+    const yesAsk = parseFloat(market.yes_ask_dollars);
+    const noBid = parseFloat(market.no_bid_dollars);
+    const noAsk = parseFloat(market.no_ask_dollars);
     
     // Validate that all values are valid numbers before computing spreads
     const yesSpread = (!isNaN(yesBid) && !isNaN(yesAsk)) 
