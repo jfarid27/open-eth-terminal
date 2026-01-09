@@ -45,7 +45,12 @@ const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => 
     {
         name: "market",
         command: "market <slug> [type]",
-        description: "Fetch a specific market by slug.",
+        description: `Fetch a specific market by slug.
+        
+        type (optional): spot | chart
+            - spot (default): show current market details
+            - chart: show historical price chart for the market
+        `,
         action: predictionMarketViewHandler,
     },
     {
