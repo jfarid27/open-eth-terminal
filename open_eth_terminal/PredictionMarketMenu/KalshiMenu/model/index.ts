@@ -9,7 +9,7 @@ const KalshiData = {
 }
 
 const PredictionMarketsData = {
-   kalshiData: KalshiData,    
+   kalshiData: KalshiData
 }
 
 export default PredictionMarketsData;

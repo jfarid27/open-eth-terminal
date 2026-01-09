@@ -1,5 +1,5 @@
 import axios from "axios";
-import { pause } from "./../../../utils/timing.ts"
+import { pause } from "./../../../utils/timing.ts";
 
 /**
  * Fetches market data for a given event ticker from Kalshi.

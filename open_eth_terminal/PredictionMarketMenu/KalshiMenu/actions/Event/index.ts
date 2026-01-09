@@ -34,18 +34,23 @@ const extractBidAskData = (market: any) => {
     const noBid = parseFloat(market.no_bid_dollars || "0");
     const noAsk = parseFloat(market.no_ask_dollars || "0");
     
-    const yesSpread = (yesAsk - yesBid).toFixed(4);
-    const noSpread = (noAsk - noBid).toFixed(4);
+    // Validate that all values are valid numbers before computing spreads
+    const yesSpread = (!isNaN(yesBid) && !isNaN(yesAsk)) 
+        ? (yesAsk - yesBid).toFixed(4) 
+        : "N/A";
+    const noSpread = (!isNaN(noBid) && !isNaN(noAsk)) 
+        ? (noAsk - noBid).toFixed(4) 
+        : "N/A";
     
     return {
         yes: {
-            bid: market.yes_bid_dollars,
-            ask: market.yes_ask_dollars,
+            bid: market.yes_bid_dollars || "N/A",
+            ask: market.yes_ask_dollars || "N/A",
             spread: yesSpread,
         },
         no: {
-            bid: market.no_bid_dollars,
-            ask: market.no_ask_dollars,
+            bid: market.no_bid_dollars || "N/A",
+            ask: market.no_ask_dollars || "N/A",
             spread: noSpread,
         }
     };
