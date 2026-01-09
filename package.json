@@ -18,7 +18,10 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "deno test --allow-env --allow-read --allow-net --allow-sys",
+    "test:e2e": "deno test test/ --allow-all",
+    "test:all": "deno test --allow-all",
+    "test:coverage": "deno test --allow-all --coverage=coverage",
     "tsc": "npx tsc --noEmit",
     "start": "npx tsx index.ts"
   },
