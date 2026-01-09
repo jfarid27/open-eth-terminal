@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, it } from "jsr:@std/testing/bdd";
+import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import { mockMarketData } from "./constants.ts";
 import { processMarketSlugDataResponse } from "./index.ts"
