@@ -36,11 +36,11 @@ describe("Polymarket Market Data Transformer", () => {
             ).toBe(mockMarketData.active);
 
             expect(marketData[1],
-                "Liquidity be correctly identified"
+                "Liquidity should be correctly identified"
             ).toBe(mockMarketData.liquidityNum);
 
             expect(marketData[2],
-                "Volume be correctly identified"
+                "Volume should be correctly identified"
             ).toBe(mockMarketData.volumeNum);
         
         });
