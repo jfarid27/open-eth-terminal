@@ -66,10 +66,15 @@ export const fredHandler = (st: TerminalUserStateConfig) => async (
         };
 
         // Fetch series metadata to get the title
-        const metadata = await government.fred.getMetadata(seriesObj, FRED_API_KEY);
-        const seriesTitle = metadata?.seriess?.[0]?.title || seriesId;
-        
-        applicationLogging(LogLevel.Debug)(`Series metadata: ${JSON.stringify(metadata)}`);
+        let seriesTitle = seriesId; // Default to series ID if metadata fetch fails
+        try {
+            const metadata = await government.fred.getMetadata(seriesObj, FRED_API_KEY);
+            seriesTitle = metadata?.seriess?.[0]?.title || seriesId;
+            applicationLogging(LogLevel.Debug)(`Series title: ${seriesTitle}`);
+        } catch (metadataError) {
+            applicationLogging(LogLevel.Warning)(`Failed to fetch series metadata: ${metadataError}`);
+            console.log(chalk.yellow(`Warning: Using series ID as title`));
+        }
 
         // Fetch series observations data
         const result = await government.fred.get(seriesObj, startDate, endDate, FRED_API_KEY);
