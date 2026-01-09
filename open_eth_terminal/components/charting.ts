@@ -136,23 +136,22 @@ export async function showMultiLineChart(
     const jsdom = new JSDOM("");
     const document = jsdom.window.document;
     
-    // Combine all data with series labels for automatic legend generation
-    const combinedData = series.flatMap((s) => 
-        s.data.map((d) => ({
-            ...d,
-            series: s.label,
-            seriesColor: s.options?.color || "steelblue"
-        }))
-    );
-    
-    // Create color scale mapping
-    const colorDomain = series.map(s => s.label);
-    const colorRange = series.map(s => s.options?.color || "steelblue");
+    // Create a line mark for each series
+    const lineMarks = series.map((s) => {
+        return Plot.line(s.data, {
+            x: (d: any) => new Date(d[x] * 1000), // Convert Unix timestamp to Date
+            y: (d: any) => Number(d[y]),
+            stroke: s.options?.color || "steelblue",
+            strokeWidth: 2,
+            tip: true,
+        });
+    });
     
     // We render the plot using the passing document
     const plot = Plot.plot({
         document: document,
         title,
+        subtitle: series.map((s, i) => `${s.label} (${s.options?.color || 'steelblue'})`).join('  •  '),
         style: {
             background: "black",
             color: "white",
@@ -164,20 +163,7 @@ export async function showMultiLineChart(
             tickFormat: "%Y-%m-%d",
         },
         y: { label: yLabel },
-        color: {
-            legend: true,
-            domain: colorDomain,
-            range: colorRange,
-        },
-        marks: [
-            Plot.line(combinedData, {
-                x: (d: any) => new Date(d[x] * 1000), // Convert Unix timestamp to Date
-                y: (d: any) => Number(d[y]),
-                stroke: "series",
-                strokeWidth: 2,
-                tip: true,
-            })
-        ]
+        marks: lineMarks
     });
 
     // Ensure the SVG element itself has the background style, 
