@@ -1,8 +1,4 @@
-import { project, pipe, set, filter, toLower, lensProp, map,
-    lensPath, view, defaultTo, zip, tap, find,
-    props,
-    reduce
-} from "ramda";
+import { pipe, map, zip, props } from "ramda";
 import terminalKit from "terminal-kit";
 const { terminal } = terminalKit;
 import {
