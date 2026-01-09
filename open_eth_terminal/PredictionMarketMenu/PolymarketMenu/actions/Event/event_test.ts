@@ -20,15 +20,15 @@ describe("Polymarket Event Data Transformer", () => {
             ).toBe(eventMockData.active);
 
             expect(marketData[2],
-                "Liquidity be correctly identified"
+                "Liquidity should be correctly identified"
             ).toBe(eventMockData.liquidity);
 
             expect(marketData[3],
-                "Volume be correctly identified"
+                "Volume should be correctly identified"
             ).toBe(eventMockData.volume);
 
             expect(marketData[4],
-                "Competitive be correctly identified"
+                "Competitive should be correctly identified"
             ).toBe(eventMockData.competitive);
         
         });
