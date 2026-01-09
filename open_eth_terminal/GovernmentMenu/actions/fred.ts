@@ -10,22 +10,40 @@ import { showLineChart } from "./../../components/charting.ts";
 import { pipe, prop, map, sortBy } from "ramda";
 
 /**
+ * Processed FRED observation data point
+ */
+interface ProcessedFredObservation {
+    date: string;
+    value: number;
+    timestamp: number;
+}
+
+/**
+ * Raw FRED API response structure
+ */
+interface FredApiResponse {
+    observations: Array<{ date: string; value: string }>;
+}
+
+/**
  * Process the FRED series data by transforming observations into
  * an array of objects with date, value, timestamp
  * @param data raw object data from FRED API 
  * @returns object array with date, value, timestamp
  */
-export const processFredData = pipe(
-    prop("observations"),
-    map((obs: any) => {
-        return {
-            date: obs.date,
-            value: parseFloat(obs.value),
-            timestamp: new Date(obs.date).getTime()
-        };
-    }),
-    sortBy(prop("timestamp"))
-);
+export const processFredData = (data: FredApiResponse): ProcessedFredObservation[] => {
+    return pipe(
+        prop("observations"),
+        map((obs: any) => {
+            return {
+                date: obs.date,
+                value: parseFloat(obs.value),
+                timestamp: new Date(obs.date).getTime()
+            };
+        }),
+        sortBy(prop("timestamp"))
+    )(data) as ProcessedFredObservation[];
+};
 
 export const fredHandler = (st: TerminalUserStateConfig) => async (
     seriesId: string,
