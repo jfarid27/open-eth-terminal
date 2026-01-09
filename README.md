@@ -86,6 +86,7 @@ price aave
 back
 government
 fred GNPCA 2020-01-01 2024-12-31
+fredv2 GDP,GNPCA 2020-01-01 2024-12-31
 back
 ```
 
@@ -96,7 +97,7 @@ The Government menu provides access to economic data from the Federal Reserve Ec
 To use the FRED features:
 1. Set your FRED API key in the `.env` file or use the `keys` command: `keys fred your_api_key_here`
 2. Navigate to the government menu: `government`
-3. Use the `fred` command to fetch and chart economic data series:
+3. Use the `fred` command to fetch and chart a single economic data series:
    ```
    fred GNPCA 2020-01-01 2024-12-31
    ```
@@ -104,6 +105,14 @@ To use the FRED features:
    - `GNPCA` is the series ID (e.g., GNPCA for Gross National Product)
    - `2020-01-01` is the start date (YYYY-MM-DD format)
    - `2024-12-31` is the end date (YYYY-MM-DD format)
+
+4. Use the `fredv2` command to fetch and chart multiple series on one chart for comparison:
+   ```
+   fredv2 GDP,GNPCA,UNRATE 2020-01-01 2024-12-31
+   ```
+   Where:
+   - `GDP,GNPCA,UNRATE` is a comma-separated list of series IDs
+   - Each series will be plotted with a different color on the same chart
 
 You can find series IDs by browsing [FRED](https://fred.stlouisfed.org/).
 
