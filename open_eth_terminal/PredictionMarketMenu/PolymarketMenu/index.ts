@@ -44,7 +44,7 @@ const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => 
     },
     {
         name: "market",
-        command: "market [slug]",
+        command: "market <slug> [type]",
         description: "Fetch a specific market by slug.",
         action: predictionMarketViewHandler,
     },

@@ -6,8 +6,9 @@ import terminalKit from "terminal-kit";
 import PredictionMarketsData from "./../../model/index.ts";
 const { terminal } = terminalKit;
 import { inspectLogger } from "./../../../../utils/logging.ts";
+import { showLineChart } from "./../../../../components/charting.ts";
 import chalk from "chalk";
-import { zip, pipe, props, map } from "ramda";
+import { zip, pipe, props, map, prop } from "ramda";
 
 export const xPolymarketMarketData = props([
     "active",
@@ -56,13 +57,55 @@ export const processMarketSlugDataResponse = pipe(
     }),
 );
 
+const splitClobIds = (marketResponseData: any) => JSON.parse(marketResponseData.clobTokenIds);
+
+export const processMarketPriceHistory = pipe(
+    prop("history"),
+    map((r:any) => {
+        return {timestamp: r.t, price: r.p};
+    }),
+)
+
+/*
+ * Prints a market chart for the given market slug.
+ * 
+ * @param st Terminal User State 
+ * @param slug Polymarket Defined Market Slug. 
+ * @returns CommandState 
+ */
+export const marketChartHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+    const applicationLogging = inspectLogger(st);
+    applicationLogging(LogLevel.Info)(`Fetching chart for ${slug}`);
+    const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
+    applicationLogging(LogLevel.Debug)(response);
+    const clobIds = splitClobIds(response);
+    applicationLogging(LogLevel.Debug)(clobIds);
+    
+    const yesPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[0]);
+    const noPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[1]);
+    applicationLogging(LogLevel.Debug)(yesPrices);
+    applicationLogging(LogLevel.Debug)(noPrices);
+    
+    const yesPricesProcessed = processMarketPriceHistory(yesPrices);
+    const noPricesProcessed = processMarketPriceHistory(noPrices);
+    
+    await showLineChart(yesPricesProcessed, "timestamp", "price", response.question + ": Yes");
+    await showLineChart(noPricesProcessed, "timestamp", "price", response.question + ": No");
+
+    return {
+        result: { type: CommandResultType.Success },
+        state: st,
+    };
+
+}
+
 /**
  * Fetches market for the given market id.
  * @param st Terminal User State 
  * @param tag Polymarket Defined Market ID. 
  * @returns CommandState 
  */
-export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string): Promise<CommandState> => {
+export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserStateConfig) => async (slug?: string, type?: string): Promise<CommandState> => {
     const applicationLogging = inspectLogger(st);
     
     if (!slug) {
@@ -72,6 +115,11 @@ export const predictionMarketViewHandler: ActionHandler = (st: TerminalUserState
             state: st,
         };
     }
+    
+    if (type && type === "chart") {
+        return marketChartHandler(st)(slug);
+    }
+
     const response = await PredictionMarketsData.polyMarketData.market.getBySlug(slug);
     const { marketData, outcomeData } = processMarketSlugDataResponse(response);
     applicationLogging(LogLevel.Debug)(response);

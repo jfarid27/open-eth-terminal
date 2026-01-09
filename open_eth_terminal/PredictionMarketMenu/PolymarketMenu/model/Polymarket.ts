@@ -1,6 +1,24 @@
 import axios from "axios";
 import { pause } from "./../../../utils/timing.ts"
 
+export async function fetchMarketPriceHistoryByClobId(clobId: string) {
+    
+    const OneWeekAgoUnixTimestamp = Date.now() / 1000 - 60 * 60 * 24 * 7;
+    const CurrentUnixTimestamp = Date.now() / 1000;
+    const response = await axios.get(
+        `https://clob.polymarket.com/prices-history`,
+        {
+            params: {
+                market: clobId,
+                startTs: OneWeekAgoUnixTimestamp,
+                endTs: CurrentUnixTimestamp,
+                interval: "6h"
+            },
+        }
+    );
+    return response.data;
+}
+
 /**
  * Fetches the list of available topic tags from Polymarket.
  * @link https://docs.polymarket.com/api-reference/
