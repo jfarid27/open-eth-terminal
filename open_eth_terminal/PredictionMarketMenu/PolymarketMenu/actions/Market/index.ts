@@ -57,7 +57,13 @@ export const processMarketSlugDataResponse = pipe(
     }),
 );
 
-const splitClobIds = (marketResponseData: any) => JSON.parse(marketResponseData.clobTokenIds);
+const splitClobIds = (marketResponseData: any) => {
+    try {
+        return JSON.parse(marketResponseData.clobTokenIds);
+    } catch (error) {
+        return [];
+    }
+}
 
 export const processMarketPriceHistory = pipe(
     prop("history"),
@@ -82,6 +88,14 @@ export const marketChartHandler: ActionHandler = (st: TerminalUserStateConfig) =
         applicationLogging(LogLevel.Debug)(response);
         const clobIds = splitClobIds(response);
         applicationLogging(LogLevel.Debug)(clobIds);
+        
+        if (clobIds.length !== 2) {
+            console.log(chalk.red("Invalid clob ids"));
+            return {
+                result: { type: CommandResultType.Error },
+                state: st,
+            };
+        }
 
         const yesPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[0]);
         const noPrices = await PredictionMarketsData.polyMarketData.market.prices(clobIds[1]);
