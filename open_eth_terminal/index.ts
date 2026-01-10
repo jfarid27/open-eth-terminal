@@ -3,6 +3,7 @@ import { lensPath, set, view } from "ramda";
 import cryptoTerminal from "./CryptoMenu/index.ts";
 import predictionMarketsTerminal from "./PredictionMarketMenu/index.ts";
 import stocksTerminal from "./StocksMenu/index.ts";
+import governmentTerminal from "./GovernmentMenu/index.ts";
 import { menuGlobalsTop } from "./utils/menu_globals.ts";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -14,6 +15,7 @@ import {
     ENVIRONMENT, LOG_LEVEL,
     COINGECKO_API_KEY, ALPHAVANTAGE_API_KEY,
     BLOCKCHAINCOM_API_KEY, FREECRYPTOAPI_API_KEY,
+    FRED_API_KEY,
 } from "./config.ts";
 
 import { Menu, MenuOption, TerminalUserStateConfig, CommandResultType, LogLevel, EnvironmentType } from "./types.ts";
@@ -62,6 +64,18 @@ const menuOptions = (state: TerminalUserStateConfig): MenuOption[] => ([
         description: "Fetch prediction markets prices from various sources",
         action: (st: TerminalUserStateConfig) => async () => {
             const newState = await predictionMarketsTerminal(st);
+            return {
+                result: { type: CommandResultType.Success },
+                state: newState,
+            };
+        },
+    },
+    {
+        name: "government",
+        command: "government",
+        description: "Fetch government economic data from various sources",
+        action: (st: TerminalUserStateConfig) => async () => {
+            const newState = await governmentTerminal(st);
             return {
                 result: { type: CommandResultType.Success },
                 state: newState,
@@ -173,6 +187,7 @@ export async function startMain() {
         alphavantage: ALPHAVANTAGE_API_KEY,
         blockchaincom: BLOCKCHAINCOM_API_KEY,
         freecryptoapi: FREECRYPTOAPI_API_KEY,
+        fred: FRED_API_KEY,
     },
     loadedContext: {},
     scriptContext: {}

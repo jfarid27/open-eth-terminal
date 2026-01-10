@@ -16,6 +16,7 @@ export enum APIKeyType {
     Alphavantage = "alphavantage",
     BlockchainCom = "blockchaincom",
     FreeCryptoAPI = "freecryptoapi",
+    Fred = "fred",
 }
 
 /**
@@ -26,6 +27,7 @@ export enum DataSourceType {
     AlphaVantage = 'alphavantage',
     BlockchainCom = 'blockchaincom',
     FreeCryptoAPI = 'freecryptoapi',
+    Fred = 'fred',
 }
    
 /**
@@ -36,6 +38,7 @@ export interface DatasourceKeyMapping {
     [DataSourceType.AlphaVantage]: APIKeyType.Alphavantage;
     [DataSourceType.BlockchainCom]: APIKeyType.BlockchainCom;
     [DataSourceType.FreeCryptoAPI]: APIKeyType.FreeCryptoAPI;
+    [DataSourceType.Fred]: APIKeyType.Fred;
 }
     
 /**
