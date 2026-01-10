@@ -52,9 +52,19 @@ Set up your environment variables:
 deno run start 
 ```
 
+To run a script directly from the command line:
+```bash
+deno run start --oet-script <filename>.txt
+```
+
 ### Node.js
 ```bash
 npx tsx index.ts
+```
+
+To run a script directly from the command line:
+```bash
+npx tsx index.ts --oet-script <filename>.txt
 ```
 
 ## Features
@@ -69,8 +79,32 @@ Actions will dump data and information in specific locations like the terminal i
 Scripting is a useful tool for users who want to perform automated analysis.
 
 Create a scripts directory in the top level folder, and create a script file with any extension. You
-can then run a script with the script command, and pass the filename as an argument. An example
-script file could be as simple as the example below.
+can then run a script with the script command, and pass the filename as an argument. 
+
+#### Running Scripts Interactively
+
+From within the terminal, use the `script` command:
+```bash
+script <filename>.txt
+```
+
+#### Running Scripts from Command Line
+
+You can also run scripts directly from the command line using the `--oet-script` flag. The terminal will execute the script and exit automatically:
+
+**Deno:**
+```bash
+deno run start --oet-script <filename>.txt
+```
+
+**Node.js:**
+```bash
+npx tsx index.ts --oet-script <filename>.txt
+```
+
+#### Example Script
+
+An example script file could be as simple as the example below:
 
 ```bash
 news

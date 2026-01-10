@@ -156,9 +156,11 @@ const mainMenu: Menu = {
 
 export const terminalMain = registerTerminalApplication(mainMenu);
 
-export async function startMain() {
-  // Only show banner on initial load
-  console.log(chalk.green(figlet.textSync("Open Eth Terminal", { horizontalLayout: 'full' })));
+export async function startMain(scriptFilename?: string) {
+  // Only show banner on initial load (skip if running a script)
+  if (!scriptFilename) {
+    console.log(chalk.green(figlet.textSync("Open Eth Terminal", { horizontalLayout: 'full' })));
+  }
   
   const logLevelMap: { [key: string]: LogLevel } = {
     "debug": LogLevel.Debug,
@@ -179,6 +181,35 @@ export async function startMain() {
   const environment = (ENVIRONMENT && ENVIRONMENT in environmentMap) ?
     environmentMap[ENVIRONMENT] : EnvironmentType.Production;
   
+  let initialScriptContext = {};
+  
+  // If script filename is provided, load it and set up script context
+  if (scriptFilename) {
+    try {
+      const scriptPath = join(process.cwd(), "scripts", scriptFilename);
+      const fileContent = await readFile(scriptPath, "utf-8");
+      const commands = fileContent.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+      const [currentCommand, ...tailCommands] = commands;
+      
+      if (currentCommand) {
+        console.log(chalk.green(`Loading script: ${scriptFilename}`));
+        initialScriptContext = {
+          filename: scriptFilename,
+          currentCommand,
+          tailCommands,
+          exitAfterCompletion: true, // Signal to exit after script completes
+        };
+      } else {
+        console.log(chalk.yellow(`Script file ${scriptFilename} is empty`));
+        process.exit(0);
+      }
+    } catch (error) {
+      console.error(chalk.red(`Failed to load script file: ${scriptFilename}`));
+      console.error(chalk.red(`Error: ${error}`));
+      process.exit(1);
+    }
+  }
+  
   const state: TerminalUserStateConfig = {
     environment: environment,
     logLevel: logLevel,
@@ -190,7 +221,7 @@ export async function startMain() {
         fred: FRED_API_KEY,
     },
     loadedContext: {},
-    scriptContext: {}
+    scriptContext: initialScriptContext
   };
   
   try {

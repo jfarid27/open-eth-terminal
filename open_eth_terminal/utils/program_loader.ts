@@ -110,6 +110,7 @@ export const registerTerminalApplication = (menu: Menu) => {
             const resultPs: Promise<CommandState>[] = menu_options.map((option) => {
                 if (isScriptExecution) {
                     const [nextCommand, ...rest] = st.scriptContext.tailCommands || [];
+                    
                     const nextScriptState: TerminalUserStateConfig = {
                         ...st,
                         scriptContext: {
@@ -137,6 +138,13 @@ export const registerTerminalApplication = (menu: Menu) => {
 
             let nextState = result.state;
             
+            // Check if script has completed and should exit
+            if (isScriptExecution && 
+                nextState.scriptContext?.exitAfterCompletion && 
+                !nextState.scriptContext?.currentCommand) {
+                console.log(chalk.green("Script execution completed successfully"));
+                process.exit(0);
+            }
             
             return terminalApplication(nextState);
 
@@ -156,6 +164,12 @@ export const registerTerminalApplication = (menu: Menu) => {
             // If error occurred during script execution, abort.
             if (st.scriptContext?.currentCommand) {
                 console.log(chalk.red("Script execution aborted due to error."));
+                
+                // If running from command line with --oet-script, exit with error code
+                if (st.scriptContext?.exitAfterCompletion) {
+                    process.exit(1);
+                }
+                
                 const abortState = {
                     ...st,
                     scriptContext: {} // Clear script context
