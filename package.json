@@ -19,7 +19,7 @@
   "main": "index.js",
   "scripts": {
     "test": "deno test --allow-env --allow-read --allow-net --allow-sys",
-    "test:e2e": "deno test test/ --allow-all",
+    "test:e2e": "deno test test/e2e/ --allow-all",
     "test:all": "deno test --allow-all",
     "test:coverage": "deno test --allow-all --coverage=coverage",
     "tsc": "npx tsc --noEmit",
