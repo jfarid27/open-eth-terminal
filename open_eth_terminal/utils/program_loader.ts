@@ -110,12 +110,17 @@ export const registerTerminalApplication = (menu: Menu) => {
             const resultPs: Promise<CommandState>[] = menu_options.map((option) => {
                 if (isScriptExecution) {
                     const [nextCommand, ...rest] = st.scriptContext.tailCommands || [];
+                    
+                    // Check if this is the last command and we should exit after completion
+                    const shouldExitAfter = st.scriptContext.exitAfterCompletion && !nextCommand;
+                    
                     const nextScriptState: TerminalUserStateConfig = {
                         ...st,
                         scriptContext: {
                             ...st.scriptContext,
                             currentCommand: nextCommand,
-                            tailCommands: rest
+                            tailCommands: rest,
+                            exitAfterCompletion: shouldExitAfter ? true : st.scriptContext.exitAfterCompletion
                         }
                     };
                     return loadProgram(program, option, nextScriptState)    
@@ -137,6 +142,13 @@ export const registerTerminalApplication = (menu: Menu) => {
 
             let nextState = result.state;
             
+            // Check if script has completed and should exit
+            if (isScriptExecution && 
+                nextState.scriptContext?.exitAfterCompletion && 
+                !nextState.scriptContext?.currentCommand) {
+                console.log(chalk.green("Script execution completed successfully"));
+                process.exit(0);
+            }
             
             return terminalApplication(nextState);
 

@@ -82,6 +82,7 @@ export interface ScriptContext {
     filename?: string;
     currentCommand?: string;
     tailCommands?: string[];
+    exitAfterCompletion?: boolean;
 }
 
 /**
