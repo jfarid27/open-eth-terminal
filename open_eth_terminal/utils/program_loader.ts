@@ -111,16 +111,12 @@ export const registerTerminalApplication = (menu: Menu) => {
                 if (isScriptExecution) {
                     const [nextCommand, ...rest] = st.scriptContext.tailCommands || [];
                     
-                    // Check if this is the last command and we should exit after completion
-                    const shouldExitAfter = st.scriptContext.exitAfterCompletion && !nextCommand;
-                    
                     const nextScriptState: TerminalUserStateConfig = {
                         ...st,
                         scriptContext: {
                             ...st.scriptContext,
                             currentCommand: nextCommand,
-                            tailCommands: rest,
-                            exitAfterCompletion: shouldExitAfter ? true : st.scriptContext.exitAfterCompletion
+                            tailCommands: rest
                         }
                     };
                     return loadProgram(program, option, nextScriptState)    
