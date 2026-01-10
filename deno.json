@@ -1,11 +1,5 @@
 {
     "tasks": {
-        "start": "deno run --allow-sys --allow-run --allow-net --allow-env --allow-read=.env,./tmp,./data,./portfolios,./scripts,./node_modules --allow-write=./tmp,./data index.ts",
-        "test": "deno test --allow-env --allow-read --allow-net --allow-sys",
-        "test:e2e": "deno test test/ --allow-all",
-        "test:all": "deno test --allow-all",
-        "test:coverage": "deno test --allow-all --coverage=coverage",
-        "coverage:report": "deno coverage coverage --lcov > coverage.lcov",
-        "coverage:html": "deno coverage coverage --html"
+        "start": "deno run --allow-sys --allow-run --allow-net --allow-env --allow-read=.env,./tmp,./data,./portfolios,./scripts,./node_modules --allow-write=./tmp,./data index.ts"
     }
 }

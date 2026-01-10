@@ -4,7 +4,3 @@ node_modules
 /data/*
 /scripts/*
 /portfolios/*
-
-# Test coverage output
-coverage/
-coverage.lcov

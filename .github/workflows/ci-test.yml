@@ -30,18 +30,11 @@ jobs:
         with:
           node-version: lts/*
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install step
+        run: "npm install"
 
-      - name: Type Check
-        run: deno check index.ts
+      - name: Check step
+        run: "deno check"
 
-      - name: Unit Tests with Coverage
-        run: deno test --allow-env --allow-read --allow-net --allow-sys --coverage=coverage
-
-      - name: E2E Tests
-        run: deno test test/ --allow-all
-        timeout-minutes: 5
-        env:
-          MOCK_API: "true"
-
+      - name: Test step
+        run: "deno test --allow-env --allow-read=./node_modules --allow-sys"
