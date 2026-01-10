@@ -168,6 +168,12 @@ export const registerTerminalApplication = (menu: Menu) => {
             // If error occurred during script execution, abort.
             if (st.scriptContext?.currentCommand) {
                 console.log(chalk.red("Script execution aborted due to error."));
+                
+                // If running from command line with --oet-script, exit with error code
+                if (st.scriptContext?.exitAfterCompletion) {
+                    process.exit(1);
+                }
+                
                 const abortState = {
                     ...st,
                     scriptContext: {} // Clear script context
