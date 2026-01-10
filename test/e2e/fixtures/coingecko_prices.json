@@ -1,0 +1,20 @@
+{
+  "bitcoin": {
+    "usd": 50000,
+    "usd_24h_change": 2.5,
+    "usd_market_cap": 980000000000,
+    "usd_24h_vol": 25000000000
+  },
+  "ethereum": {
+    "usd": 3000,
+    "usd_24h_change": -1.2,
+    "usd_market_cap": 360000000000,
+    "usd_24h_vol": 15000000000
+  },
+  "solana": {
+    "usd": 100,
+    "usd_24h_change": 5.0,
+    "usd_market_cap": 45000000000,
+    "usd_24h_vol": 3000000000
+  }
+}
