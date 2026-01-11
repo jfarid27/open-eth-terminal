@@ -413,57 +413,114 @@ interface PositionPoint {
     value: number;
 }
 
+enum PolymarketPositionType {
+    Error = "Error",
+    Success = "Success",
+}
+
+interface PolymarketSpotPositionError {
+    _type: PolymarketPositionType.Error;
+    slug: string;
+    error: string;
+}
+
 interface PolymarketSpotPosition {
+    _type: PolymarketPositionType.Success;
     slug: string,
     question: string,
     positionPoint: PositionPoint
 }
 
+type PolymarketSpotPositionResult = PolymarketSpotPosition | PolymarketSpotPositionError;
+
+
+/**
+ * Processes the portfolio analysis for the given portfolio. 
+ * @param st {TerminalUserStateConfig} 
+ * @param portfolio {PolymarketPortfolio} 
+ * @returns {CommandState}
+ */
 const portfolioAnalysisSpotHandler = async (st: TerminalUserStateConfig, portfolio: PolymarketPortfolio) => {
     const applicationLogging = inspectLogger(st); 
     applicationLogging(LogLevel.Debug)(`Running Portfolio SpotHandler`);
     
     const portfolioDataPs = await pipe(
-        map(async (position: PolymarketPosition): Promise<PolymarketSpotPosition> => {
-            applicationLogging(LogLevel.Debug)("Processing MarketData for slug: " + position.slug);
-            const { outcomeData, response } = await processMarketDataBySlug(position.slug);
-            applicationLogging(LogLevel.Info)("Question: ");
-            applicationLogging(LogLevel.Info)(response);
-            applicationLogging(LogLevel.Debug)("Processed OutcomeData");
-            applicationLogging(LogLevel.Debug)(outcomeData);
-            const position_outcome = position.outcome;
-            const outcomePrice = outcomeData[0].length > 1 && find((outcome: any[]) => outcome[0] === position_outcome)(outcomeData[0][1])
-            
-            if (!outcomePrice || outcomePrice.length < 2) {
-                applicationLogging(LogLevel.Debug)(`Outcome ${position_outcome} not found for market ${position.slug}`);
-                throw new Error(`Outcome ${position_outcome} not found for market ${position.slug}`); 
+        map(async (position: PolymarketPosition): Promise<PolymarketSpotPositionResult> => {
+            applicationLogging(LogLevel.Info)("Processing MarketData for slug: " + position.slug);
+            try {
+                const { outcomeData, response } = await processMarketDataBySlug(position.slug);
+                applicationLogging(LogLevel.Info)("Question: ");
+                applicationLogging(LogLevel.Info)(response);
+                applicationLogging(LogLevel.Debug)("Processed OutcomeData");
+                applicationLogging(LogLevel.Debug)(outcomeData);
+                const position_outcome = position.outcome;
+                const outcomePrice = outcomeData[0].length > 1 && find((outcome: any[]) => outcome[0] === position_outcome)(outcomeData[0][1])
+                
+                if (!outcomePrice || outcomePrice.length < 2) {
+                    applicationLogging(LogLevel.Debug)(`Outcome ${position_outcome} not found for market ${position.slug}`);
+                    throw new Error(`Outcome ${position_outcome} not found for market ${position.slug}`); 
 
-            }
-            return {
-                slug: position.slug,
-                question: response.question,
-                positionPoint: {
-                    outcome: position.outcome,
-                    amount: position.amount,
-                    price: outcomePrice[1],
-                    value: position.amount * outcomePrice[1],
                 }
-            };
+                const resolvedPosition: PolymarketSpotPosition = {
+                    _type: PolymarketPositionType.Success,
+                    slug: position.slug,
+                    question: response.question,
+                    positionPoint: {
+                        outcome: position.outcome,
+                        amount: position.amount,
+                        price: outcomePrice[1],
+                        value: position.amount * outcomePrice[1],
+                    }
+                };
+                return resolvedPosition;
+
+            } catch (err) {
+                applicationLogging(LogLevel.Info)(`Error processing market data for slug ${position.slug}`);
+                applicationLogging(LogLevel.Debug)(err);
+                const error: PolymarketSpotPositionError = {
+                    _type: PolymarketPositionType.Error,
+                    slug: position.slug,
+                    error: "Failed to process market data for slug " + position.slug,
+                };
+                return error;
+            }
         }),
     )(portfolio.positions);
     
-    const portfolioData: PolymarketSpotPosition[] = await Promise.all(portfolioDataPs);
-    const tablePortfolioData = map((r: PolymarketSpotPosition) => ([
-        r.question,
-        r.slug,
-        r.positionPoint.amount.toString(),
-        r.positionPoint.price.toString(),
-        r.positionPoint.value.toString(),
-    ]))(portfolioData);
+    const portfolioData: PolymarketSpotPositionResult[] = await Promise.all(portfolioDataPs);
+    const processTablePortfolioData = map((r: PolymarketSpotPositionResult) => {
+        
+        switch (r._type) {
+            case PolymarketPositionType.Success:
+                return [
+                    r.question,
+                    r.slug,
+                    r.positionPoint.amount.toString(),
+                    r.positionPoint.price.toString(),
+                    r.positionPoint.value.toString(),
+                ];
+            case PolymarketPositionType.Error:
+                return [
+                    "N/A: An error occurred fetching market data for this position",
+                    r.slug,
+                    "0",
+                    "0",
+                    "0",
+                ];
+        }
+    });
     
-    const totalValue = reduce((acc: number, r: PolymarketSpotPosition) => acc + r.positionPoint.value, 0)(portfolioData);
+    const totalValue = reduce((acc: number, r: PolymarketSpotPositionResult) => {
+        switch (r._type) {
+            case PolymarketPositionType.Success:
+                return acc + r.positionPoint.value;
+            case PolymarketPositionType.Error:
+                return acc;
+        }
+    }, 0)(portfolioData);
     
     applicationLogging(LogLevel.Debug)(portfolioData)
+    const tablePortfolioData = processTablePortfolioData(portfolioData)
 
     terminal.table([
         ['Question', 'Slug', 'Amount', 'Price', 'Value'],
