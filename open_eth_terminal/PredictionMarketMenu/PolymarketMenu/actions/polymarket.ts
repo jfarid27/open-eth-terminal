@@ -6,7 +6,7 @@
  */
 
 import { project, pipe, set, filter, toLower, lensProp, map,
-    lensPath, view, defaultTo, zip, tap, find,
+    lensPath, view, defaultTo, zip, prop, tap, find,
     props,
     reduce
 } from "ramda";
@@ -20,8 +20,6 @@ import chalk from "chalk";
 import { inspectLogger } from "./../../../utils/logging.ts"
 import { loadCSVPortfolio } from "./../../../utils/loaders.ts";
 import { PolymarketPortfolio, PolymarketPosition, PortfolioAnalysisType } from "./types.ts";
-import { LOG_LEVEL } from "../../../config.ts";
-import { responseEncoding } from "axios";
 
 /**
  * Lens path for predictions markets data on the User State.
@@ -433,12 +431,26 @@ interface PolymarketSpotPosition {
 
 type PolymarketSpotPositionResult = PolymarketSpotPosition | PolymarketSpotPositionError;
 
+/**
+ * Processes the outcome price from the response data given a structured outcome array from the Polymarket API.
+ * 
+ * @note Yes this is messy but the price responses is an array of arrays of strings.
+ * @param outcome 
+ * @returns {Number} price of the outcome if found, otherwise 0
+ * @see {@link https://docs.polymarket.com/api-reference/markets/get-market-by-slug#response-outcome-prices-one-of-0}
+ */
+const processOutcomePriceFromResponseData = (outcome_name: any) => pipe(
+    (data: any) => data[0][1],
+    find((outcome: any[]) => outcome[0] === outcome_name),
+    defaultTo([0, "0"]), // Always default to 0 if outcome is not found 
+    (data: any) => Number(data[1])
+);
 
 /**
  * Processes the portfolio analysis for the given portfolio. 
  * @param st {TerminalUserStateConfig} 
  * @param portfolio {PolymarketPortfolio} 
- * @returns {CommandState}
+ * @returns {Promise<CommandState>}
  */
 const portfolioAnalysisSpotHandler = async (st: TerminalUserStateConfig, portfolio: PolymarketPortfolio) => {
     const applicationLogging = inspectLogger(st); 
@@ -449,18 +461,19 @@ const portfolioAnalysisSpotHandler = async (st: TerminalUserStateConfig, portfol
             applicationLogging(LogLevel.Info)("Processing MarketData for slug: " + position.slug);
             try {
                 const { outcomeData, response } = await processMarketDataBySlug(position.slug);
-                applicationLogging(LogLevel.Info)("Question: ");
-                applicationLogging(LogLevel.Info)(response);
                 applicationLogging(LogLevel.Debug)("Processed OutcomeData");
                 applicationLogging(LogLevel.Debug)(outcomeData);
                 const position_outcome = position.outcome;
-                const outcomePrice = outcomeData[0].length > 1 && find((outcome: any[]) => outcome[0] === position_outcome)(outcomeData[0][1])
-                
-                if (!outcomePrice || outcomePrice.length < 2) {
-                    applicationLogging(LogLevel.Debug)(`Outcome ${position_outcome} not found for market ${position.slug}`);
-                    throw new Error(`Outcome ${position_outcome} not found for market ${position.slug}`); 
+                const outcomePrice = processOutcomePriceFromResponseData(position_outcome)(outcomeData);
 
-                }
+                applicationLogging(LogLevel.Info)("Question: ");
+                applicationLogging(LogLevel.Info)(response.question);
+                applicationLogging(LogLevel.Info)("Outcome: ");
+                applicationLogging(LogLevel.Info)(position_outcome);
+                applicationLogging(LogLevel.Info)("OutcomePrice: ");
+                applicationLogging(LogLevel.Info)(outcomePrice);
+
+                
                 const resolvedPosition: PolymarketSpotPosition = {
                     _type: PolymarketPositionType.Success,
                     slug: position.slug,
@@ -468,8 +481,8 @@ const portfolioAnalysisSpotHandler = async (st: TerminalUserStateConfig, portfol
                     positionPoint: {
                         outcome: position.outcome,
                         amount: position.amount,
-                        price: outcomePrice[1],
-                        value: position.amount * outcomePrice[1],
+                        price: outcomePrice,
+                        value: position.amount * outcomePrice,
                     }
                 };
                 return resolvedPosition;
