@@ -64,7 +64,7 @@ npx tsx index.ts
 
 To run a script directly from the command line:
 ```bash
-npx tsx index.ts --oet-script script/<filename>.txt
+npx tsx index.ts --oet-script scripts/<filename>.txt
 ```
 
 ## Features
