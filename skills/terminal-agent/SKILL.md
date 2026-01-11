@@ -24,7 +24,7 @@ the open-eth-terminal application.
 Please look at the README.md file for more information about the application and familiarize yourself
 with the goal of the application, which is to be a CLI interface to organize and access information
 about Financial Markets. Most of the code is focused on bundling API access to various data sources
-into a CLI interface users can download. They may also specific API keys for some services.
+into a CLI interface users can download. They may also specify API keys for some services.
 
 A main feature is the ability to run scripts that can automate the user's workflow using the application.
 Please ensure you understand how to run scripts and generate appropriate scripts for the user.

@@ -165,7 +165,7 @@ See the UserStateConfig type for more information.
 
 ### LLM Agents
 
-LLM Agent files are located in the `.claude`, `.gemini`, and `.skills` folders. If you are an
+LLM Agent files are located in the `skills`, `.claude`, and `.gemini` folders. If you are an
 agent, please refer to these files for more information about context and
 skills.
 
