@@ -54,7 +54,7 @@ deno run start
 
 To run a script directly from the command line:
 ```bash
-deno run start --oet-script <filename>.txt
+deno run start --oet-script scripts/<filename>.txt
 ```
 
 ### Node.js
@@ -64,7 +64,7 @@ npx tsx index.ts
 
 To run a script directly from the command line:
 ```bash
-npx tsx index.ts --oet-script <filename>.txt
+npx tsx index.ts --oet-script script/<filename>.txt
 ```
 
 ## Features
@@ -85,7 +85,7 @@ can then run a script with the script command, and pass the filename as an argum
 
 From within the terminal, use the `script` command:
 ```bash
-script <filename>.txt
+script scripts/<filename>.txt
 ```
 
 #### Running Scripts from Command Line
@@ -94,12 +94,12 @@ You can also run scripts directly from the command line using the `--oet-script`
 
 **Deno:**
 ```bash
-deno run start --oet-script <filename>.txt
+deno run start --oet-script scripts/<filename>.txt
 ```
 
 **Node.js:**
 ```bash
-npx tsx index.ts --oet-script <filename>.txt
+npx tsx index.ts --oet-script scripts/<filename>.txt
 ```
 
 #### Example Script
@@ -163,6 +163,16 @@ info logging to the console. The debug mode is also available in the application
 
 See the UserStateConfig type for more information.
 
+### LLM Agents
+
+LLM Agent files are located in the `.claude`, `.gemini`, and `.skills` folders. If you are an
+agent, please refer to these files for more information about context and
+skills.
+
+### Generated Files
+
+Generated files are located in the `tmp`, `data`, and `scripts` folders. These files should not be committed to the repository
+so individual users can have their own generated files.
 
 ## License
 

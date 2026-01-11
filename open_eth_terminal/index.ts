@@ -186,7 +186,7 @@ export async function startMain(scriptFilename?: string) {
   // If script filename is provided, load it and set up script context
   if (scriptFilename) {
     try {
-      const scriptPath = join(process.cwd(), "scripts", scriptFilename);
+      const scriptPath = join(process.cwd(), scriptFilename);
       const fileContent = await readFile(scriptPath, "utf-8");
       const commands = fileContent.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       const [currentCommand, ...tailCommands] = commands;
@@ -200,11 +200,11 @@ export async function startMain(scriptFilename?: string) {
           exitAfterCompletion: true, // Signal to exit after script completes
         };
       } else {
-        console.log(chalk.yellow(`Script file ${scriptFilename} is empty`));
+        console.log(chalk.yellow(`Script file ./scripts/${scriptFilename} is empty`));
         process.exit(0);
       }
     } catch (error) {
-      console.error(chalk.red(`Failed to load script file: ${scriptFilename}`));
+      console.error(chalk.red(`Failed to load script file: ./scripts/${scriptFilename}`));
       console.error(chalk.red(`Error: ${error}`));
       process.exit(1);
     }
