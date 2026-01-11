@@ -85,7 +85,7 @@ can then run a script with the script command, and pass the filename as an argum
 
 From within the terminal, use the `script` command:
 ```bash
-script scripts/<filename>.txt
+script <filename>.txt
 ```
 
 #### Running Scripts from Command Line
