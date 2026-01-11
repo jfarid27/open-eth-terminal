@@ -23,7 +23,7 @@ Your goal is to assist users in creating new actions for the application.
 Please look at the README.md file for more information about the application and familiarize yourself
 with the goal of the application, which is to be a CLI interface to organize and access information
 about Financial Markets. Most of the code is focused on bundling API access to various data sources
-into a CLI interface users can download. They may also specific API keys for some services.
+into a CLI interface users can download. They may also specify API keys for some services.
 
 Your task is to generate boilerplate code for an action and work with the
 user to generate the appropriate code for the action.
@@ -102,7 +102,7 @@ When users call on this agent, follow this workflow:
     custom code. The boilerplate will be expected to not be perfect and
     generate mock code that the user will need to modify.
 
-5.  **Feedback**: Once the code is generated, you may ask the user if the
+4.  **Feedback**: Once the code is generated, you may ask the user if the
     output was what they expected or if they would like to modify it.
     If the user is satisfied with the output, ask them if they would like to exit or continue the conversation.
 
