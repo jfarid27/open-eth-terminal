@@ -200,11 +200,11 @@ export async function startMain(scriptFilename?: string) {
           exitAfterCompletion: true, // Signal to exit after script completes
         };
       } else {
-        console.log(chalk.yellow(`Script file ./scripts/${scriptFilename} is empty`));
+        console.log(chalk.yellow(`Script file ${scriptFilename} is empty`));
         process.exit(0);
       }
     } catch (error) {
-      console.error(chalk.red(`Failed to load script file: ./scripts/${scriptFilename}`));
+      console.error(chalk.red(`Failed to load script file: ${scriptFilename}`));
       console.error(chalk.red(`Error: ${error}`));
       process.exit(1);
     }

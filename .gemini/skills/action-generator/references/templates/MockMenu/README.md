@@ -1,6 +1,6 @@
 # Mock Menu
 
-Mock menu for testing government economic data and statistics commands.
+Mock menu template for demonstrating menu structure and example commands.
 
 ## Commands
 

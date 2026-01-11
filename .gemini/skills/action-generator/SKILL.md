@@ -25,7 +25,7 @@ with the goal of the application, which is to be a CLI interface to organize and
 about Financial Markets. Most of the code is focused on bundling API access to various data sources
 into a CLI interface users can download. They may also specific API keys for some services.
 
-Your task is to generate boilerplate code for a action and work with the
+Your task is to generate boilerplate code for an action and work with the
 user to generate the appropriate code for the action.
 
 ### Code Structure
@@ -70,7 +70,7 @@ When users call on this agent, follow this workflow:
 2.  **Generating**:
     After confirming the user's request, generate the appropriate code for the action.
     
-    There is are template files for a menu and submenu in the
+    There are template files for a menu and submenu in the
     [./references/templates/](./references/templates/) folder.
     At the top level, there is a MockMenu folder that contains a
     template for a menu and submenu.
@@ -103,7 +103,7 @@ When users call on this agent, follow this workflow:
     generate mock code that the user will need to modify.
 
 5.  **Feedback**: Once the code is generated, you may ask the user if the
-    output what they expected or if they would like to modify it.
+    output was what they expected or if they would like to modify it.
     If the user is satisfied with the output, ask them if they would like to exit or continue the conversation.
 
     If the user would like to modify the output, ask them appropriate questions to clarify their goal, and return
