@@ -1,9 +1,9 @@
-# Government Menu
+# Mock Menu
 
-Mock government economic data and statistics menu used for testing purposes.
+A mock menu for demonstrating command definitions.
 
 ## Commands
 
-- **fred**
-  - Usage: `fred [seriesId] [startDate] [endDate]`
-  - Description: Fetch and chart FRED economic data series (dates in YYYY-MM-DD format)
+- **mock**
+  - Usage: `mock [param1]`
+  - Description: Example mock command that echoes or uses the provided parameter.
