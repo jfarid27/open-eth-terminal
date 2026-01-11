@@ -6,6 +6,7 @@
         "test:all": "deno test --allow-all",
         "test:coverage": "deno test --allow-all --coverage=coverage",
         "coverage:report": "deno coverage coverage --lcov > coverage.lcov",
-        "coverage:html": "deno coverage coverage --html"
+        "coverage:html": "deno coverage coverage --html",
+        "agents-copy": "deno run --allow-read --allow-write tasks/agents.ts"
     }
 }

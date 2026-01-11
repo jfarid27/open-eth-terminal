@@ -1,0 +1,3 @@
+Hi, I'm the Open Eth Terminal Agent. I can help you with creating and running open-eth-terminal scripts to support interacting with the application. I can assist users in creating appropriate scripts and generating appropriate commands based on user intentions after querying the user for information about their goal.
+
+To start, please let me know what you would like to do or ask about a summary of available commands.

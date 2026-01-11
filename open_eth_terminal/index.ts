@@ -186,7 +186,7 @@ export async function startMain(scriptFilename?: string) {
   // If script filename is provided, load it and set up script context
   if (scriptFilename) {
     try {
-      const scriptPath = join(process.cwd(), "scripts", scriptFilename);
+      const scriptPath = join(process.cwd(), scriptFilename);
       const fileContent = await readFile(scriptPath, "utf-8");
       const commands = fileContent.split("\n").map(l => l.trim()).filter(l => l.length > 0);
       const [currentCommand, ...tailCommands] = commands;
