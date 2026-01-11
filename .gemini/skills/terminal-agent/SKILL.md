@@ -80,10 +80,11 @@ When users call on this agent, follow this workflow:
     located in the main directory of the application. Since the application is able to run scripts from the command line, 
     you can use the `--oet-script` flag to run the script. Specifically you should run the script with the following command:
     ```bash
-    deno run start --oet-script <filename>.txt
+    deno run start --oet-script scripts/<filename>.txt
     ```
 5.  **Feedback**: Once the script is completed, you may summarize the results of the script to the user.
     Explicitly ask the user if the output was what they were looking for or if they would like to modify it.
-    If the user was satisfied with the output, ask them if they would like to exit and continue the conversation.
+    If the user was satisfied with the output, ask them if they would like to continue the conversation to modify the output or exit.
+
     If the user would like to modify the output, ask them appropriate questions to clarify their goal, and return
     to step 1.
