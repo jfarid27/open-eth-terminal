@@ -1,6 +1,6 @@
 # Government Menu
 
-Government economic data and statistics.
+Mock government economic data and statistics menu used for testing purposes.
 
 ## Commands
 
