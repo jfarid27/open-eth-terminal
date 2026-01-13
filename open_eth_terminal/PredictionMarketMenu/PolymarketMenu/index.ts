@@ -11,6 +11,7 @@ import {
  import { predictionUserPositionsHandler } from './actions/User/index.ts';
  import { predictionMarketViewHandler } from './actions/Market/index.ts';
  import { predictionEventViewHandler } from './actions/Event/index.ts';
+ import { polymarketMarketsSearchHandler } from './actions/Search/index.ts';
 
 /**
  *  Prediction Markets Menu Options.
@@ -63,7 +64,7 @@ const polymarketMenuOptions = (state: TerminalUserStateConfig): MenuOption[] => 
         name: "search",
         command: "search [symbol]",
         description: "Fetch available event and market tags useful for filtering.",
-        action: polymarketMarketsTagsSearchHandler,
+        action: polymarketMarketsSearchHandler,
     },
     {
         name: "user positions",
