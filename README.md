@@ -180,7 +180,7 @@ Run the application with the `dev:debug` script, then attach your favorite debug
 There is a vscode launch configuration for this called "Deno: Attach".
 
 ```bash
-denu run dev:debug
+deno run dev:debug
 ```
 
 ## License

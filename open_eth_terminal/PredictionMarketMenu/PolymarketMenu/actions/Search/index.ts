@@ -6,13 +6,11 @@ import terminalKit from "terminal-kit";
 import PredictionMarketsData from "./../../model/index.ts";
 const { terminal } = terminalKit;
 import { inspectLogger } from "./../../../../utils/logging.ts";
-import { showLineChart, showMultiLineChart, TimeSeriesData } from "./../../../../components/charting.ts";
 import chalk from "chalk";
-import { flatten, pipe, project, map, prop, filter, forEach, chain } from "ramda";
+import { pipe, map, filter } from "ramda";
 import { processOutcomeData } from "./../../utils.ts";
-import { eventMockData } from "../../../KalshiMenu/actions/Event/constants.ts";
 
-const processEventsFromResponse = pipe(
+export const processEventsFromResponse = pipe(
     (r: any) => r.events,
     filter((r: any) => r.active && !r.closed),
     map((r: any) => ({
@@ -25,7 +23,7 @@ const processEventsFromResponse = pipe(
     })),
 );
     
-const processMarketsFromResponse = pipe(
+export const processMarketsFromResponse = pipe(
     filter((r: any) => r.active && !r.closed),
     map((r: any) => ({
         tableRow: [
@@ -110,7 +108,7 @@ export const polymarketMarketsSearchHandler: ActionHandler = (st: TerminalUserSt
     } catch (error) {
         applicationLogging(LogLevel.Debug)(error);
         applicationLogging(LogLevel.Info)("Failed to fetch markets for query: " + query);
-        console.log("A network error occurred. Please try again.")
+        console.log(chalk.red("A network error occurred. Please try again."));
         return {
             result: { type: CommandResultType.Error, message: "Failed to fetch markets" },
             state: st,
