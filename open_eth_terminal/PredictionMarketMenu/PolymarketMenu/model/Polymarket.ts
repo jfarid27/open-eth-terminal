@@ -150,3 +150,25 @@ export async function fetchUserPositions(address: string) {
     await pause(1000);
     return response.data;
 }
+
+export async function fetchSearchPolymarket(query: string) {
+    const response = await axios.get(
+        `https://gamma-api.polymarket.com/public-search`,
+        {
+            headers: {
+                'content-type': 'application/json',
+                'transfer-encoding': 'chunked',
+            },
+            params: {
+                q: query,
+                limit_per_type: 5,
+                ascending: false,
+                event_status: 'open',
+                sort: 'liquidity',
+                optimized: true,
+            },
+        }
+    );
+    await pause(1000);
+    return response.data;
+}

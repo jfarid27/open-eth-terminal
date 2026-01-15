@@ -75,7 +75,7 @@ export const registerTerminalApplication = (menu: Menu) => {
                 borderAttr: { color: 'cyan' },
                 textAttr: { bgColor: 'default' },
                 firstRowTextAttr: { bgColor: 'cyan' },
-                width: 60,
+                width: 120,
                 fit: true
             });
         }
