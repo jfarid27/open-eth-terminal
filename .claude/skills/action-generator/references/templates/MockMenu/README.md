@@ -1,9 +1,9 @@
 # Mock Menu
 
-A mock menu for demonstrating command definitions.
+Mock menu template for demonstrating menu structure and example commands.
 
 ## Commands
 
 - **mock**
   - Usage: `mock [param1]`
-  - Description: Example mock command that echoes or uses the provided parameter.
+  - Description: Example mock command that accepts a single parameter.
