@@ -34,7 +34,7 @@
     -   **markets**: `markets [tag]` - Fetch markets for the given tag (default: all)
     -   **search**: `search [symbol]` - Fetch available event and market tags useful for filtering.
     -   **user positions**: `user [address]` - Fetch user positions for the given address.
-    -   **load**: `load` - Fetch available event and market tags useful for filtering.
+    -   **load**: `load` - Load or refresh Polymarket data into the current session.
 
 -   **kalshi**: `kalshi` - Enter the kalshi menu
 
