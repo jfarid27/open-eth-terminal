@@ -19,10 +19,7 @@ const processEventsFromResponse = pipe(
         tableRow:[
             r.title,
             r.slug,
-            r.active,
-            r.liquidity,
-            r.volume,
-            r.competitive,
+            r.active
         ],
         markets: processMarketsFromResponse(r.markets),
     })),
@@ -34,10 +31,6 @@ const processMarketsFromResponse = pipe(
         tableRow: [
             r.question,
             r.slug,
-            r.active,
-            r.liquidity,
-            r.volume,
-            r.competitive,
         ],
         outcomeData: processOutcomeData([r]),
     })),
@@ -61,11 +54,9 @@ export const polymarketMarketsSearchHandler: ActionHandler = (st: TerminalUserSt
 
         applicationLogging(LogLevel.Info)(`Found ${eventData.length} events`);
         
-        console.log(eventData);
-        
         for (const event of eventData) {
             terminal.table([
-                ['Event', 'Slug', 'Active', 'Liquidity', 'Volume', 'Competitive'],
+                ['Event', 'Slug', 'Active'],
                 event.tableRow,
             ], {
                 hasBorder: true,
@@ -80,7 +71,7 @@ export const polymarketMarketsSearchHandler: ActionHandler = (st: TerminalUserSt
 
             for (const market of event.markets) {
                 terminal.table([
-                    ['Question', 'Slug', 'Active', 'Liquidity', 'Volume'],
+                    ['Question', 'Slug' ],
                     market.tableRow,
                 ], {
                     hasBorder: true,

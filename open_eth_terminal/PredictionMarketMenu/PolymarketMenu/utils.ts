@@ -2,8 +2,14 @@ import { pipe, map, zip } from "ramda";
 
 /**
  * Maps the polymarket event data for outcomes and outcome prices to a string array.
+ * 
+ * @note sometimes the response is a string array, sometimes it is a JSON string of arrays
+ *       so we need to handle both cases.
  */
-export const outcomePricesMapper = (r: string): string[] => {
+export const outcomePricesMapper = (r: any): string[] => {
+    if (r.length === 2) {
+        return r;
+    }
     try {
         const parsed = JSON.parse(r);
         return parsed as string[];

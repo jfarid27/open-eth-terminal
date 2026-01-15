@@ -174,6 +174,15 @@ skills.
 Generated files are located in the `tmp`, `data`, and `scripts` folders. These files should not be committed to the repository
 so individual users can have their own generated files.
 
+### Debugging
+
+Run the application with the `dev:debug` script, then attach your favorite debugger to the process.
+There is a vscode launch configuration for this called "Deno: Attach".
+
+```bash
+denu run dev:debug
+```
+
 ## License
 
 This project is licensed under the LGPL-3.0-or-later. See the [LICENSE.md](LICENSE.md) file for details.

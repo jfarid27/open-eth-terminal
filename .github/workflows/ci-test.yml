@@ -37,10 +37,10 @@ jobs:
         run: deno check index.ts
 
       - name: Unit Tests with Coverage
-        run: deno test --allow-env --allow-read --allow-net --allow-sys --coverage=coverage --ignore=test/e2e/
+        run: deno test --allow-env --allow-read --allow-net --allow-run --allow-sys --coverage=coverage --ignore=test/e2e/
 
       - name: E2E Tests
-        run: deno test test/e2e/ --allow-all
+        run: deno test test/e2e/ --allow-env --allow-read --allow-net --allow-run --allow-sys
         timeout-minutes: 5
         env:
           MOCK_API: "true"
